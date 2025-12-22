@@ -7,8 +7,8 @@ namespace Chinese_sale_api.Repositories
 {
     public class DonorRepository : IDonorRepository
     {
-        private readonly DBContext_CheineseSale _context;
-        public DonorRepository(DBContext_CheineseSale context)
+        private readonly CheineseSale_DBContext _context;
+        public DonorRepository(CheineseSale_DBContext context)
         {
             _context = context;
         }
@@ -33,11 +33,18 @@ namespace Chinese_sale_api.Repositories
             return await _context.Donors.Include(d => d.MyGifts).FirstOrDefaultAsync(d => d.MyGifts.Any(g => g.Id == giftId));
         }
 
-        public async Task<Donor> AddDonorAsync(Donor donor)
+        public async Task<Donor?> AddDonorAsync(Donor donor)
         {
-            _context.Donors.Add(donor);
-            await _context.SaveChangesAsync();
-            return donor;
+            try
+            {
+                _context.Donors.Add(donor);
+                await _context.SaveChangesAsync();
+                return donor;
+            }
+            catch (Exception ex)
+            {
+                return null;
+            }
         }
         public async Task<Donor?> UpdateDonorAsync(int id, Donor updatedDonor)
         {
@@ -46,11 +53,15 @@ namespace Chinese_sale_api.Repositories
             {
                 return null;
             }
-            donor.Name = updatedDonor.Name;
-            donor.Email = updatedDonor.Email;
-            donor.Phone = updatedDonor.Phone;
-            await _context.SaveChangesAsync();
-            return donor;
+            try
+            {
+                donor.Name = updatedDonor.Name;
+                donor.Email = updatedDonor.Email;
+                donor.Phone = updatedDonor.Phone;
+                await _context.SaveChangesAsync();
+                return donor;
+            }
+            catch (Exception ex) { return null; }
         }
         public async Task<Donor?> DeleteDonorAsync(int id)
         {

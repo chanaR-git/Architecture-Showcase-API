@@ -1,0 +1,15 @@
+﻿using Chinese_sale_api.DTO;
+
+namespace Chinese_sale_api.Services
+{
+    public interface IGiftService
+    {
+        Task<ReadGiftDTO?> AddGiftAsync(CreateGiftDTO g);
+        Task<ReadGiftDTO?> DeleteGiftAsync(string name);
+        Task<IEnumerable<ReadGiftDTO>> getByNumBuyersAsync(int count);
+        Task<IEnumerable<ReadGiftDTO>?> GetGiftByDonorAsync(int DonorId);
+        Task<ReadGiftDTO?> GetGiftByNameAsync(string name);
+        Task<IEnumerable<ReadGiftDTO>> GetGiftsAsync();
+        Task<ReadGiftDTO?> UpdateGiftAsync(string name, UpdateGiftDTO updatedGift);
+    }
+}

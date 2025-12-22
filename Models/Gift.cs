@@ -11,7 +11,7 @@ namespace Chinese_sale_api.Models
         public Category Category { get; set; }
         public int DonorId { get; set; }
         public Donor Donor { get; set; }
-        public int Price { get; set; }
+        public int Price { get; set; } = 10;
         public string ImagePath { get; set; }
 
         public int? WinnerId { get; set; }

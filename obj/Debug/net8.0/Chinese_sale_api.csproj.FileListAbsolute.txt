@@ -291,3 +291,4 @@ C:\Users\USER\Desktop\Projects\project_api_angular\Chinese_sale_api\obj\Debug\ne
 C:\Users\USER\Desktop\Projects\project_api_angular\Chinese_sale_api\obj\Debug\net8.0\Chinese_sale_api.pdb
 C:\Users\USER\Desktop\Projects\project_api_angular\Chinese_sale_api\obj\Debug\net8.0\Chinese_sale_api.genruntimeconfig.cache
 C:\Users\USER\Desktop\Projects\project_api_angular\Chinese_sale_api\obj\Debug\net8.0\ref\Chinese_sale_api.dll
+C:\Users\USER\Desktop\Projects\project_api_angular\Chinese_sale_api\obj\Debug\net8.0\Chinese_sale_api.sourcelink.json

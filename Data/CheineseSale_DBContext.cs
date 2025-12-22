@@ -3,9 +3,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chinese_sale_api.Data
 {
-    public class DBContext_CheineseSale : DbContext
+    public class CheineseSale_DBContext : DbContext
     {
-        public DBContext_CheineseSale(DbContextOptions<DBContext_CheineseSale> options) : base(options) {}
+        public CheineseSale_DBContext(DbContextOptions<CheineseSale_DBContext> options) : base(options) { }
         public DbSet<Customer> Users { get; set; }
         public DbSet<Gift> Gifts { get; set; }
         public DbSet<Manager> Managers { get; set; }
@@ -59,6 +59,7 @@ namespace Chinese_sale_api.Data
             modelBuilder.Entity<Gift>().HasKey(g => g.Id);
             modelBuilder.Entity<Gift>().Property(g => g.Description).IsRequired().HasMaxLength(200);
             modelBuilder.Entity<Gift>().Property(g => g.Name).IsRequired().HasMaxLength(100);
+            modelBuilder.Entity<Gift>().HasIndex(g => g.Name).IsUnique();
             modelBuilder.Entity<Gift>().Property(g => g.ImagePath).IsRequired().HasMaxLength(200);
             modelBuilder.Entity<Gift>().Property(g => g.Price).IsRequired();
             modelBuilder.Entity<Gift>().Property(g => g.CategoryId).IsRequired();

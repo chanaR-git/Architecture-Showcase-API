@@ -1,0 +1,129 @@
+[
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.DonorController",
+    "Method": "GetDonorsAsync",
+    "RelativePath": "api/Donor",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.DonorController",
+    "Method": "AddDonorAsync",
+    "RelativePath": "api/Donor",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "newDonor",
+        "Type": "Chinese_sale_api.DTO.CreateDonorDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.DonorController",
+    "Method": "GetDonorByIdAsync",
+    "RelativePath": "api/Donor/{id}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.DonorController",
+    "Method": "DeleteDonorAsync",
+    "RelativePath": "api/Donor/{id}",
+    "HttpMethod": "DELETE",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.DonorController",
+    "Method": "UpdateDonorAsync",
+    "RelativePath": "api/Donor/{id}",
+    "HttpMethod": "PUT",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "id",
+        "Type": "System.Int32",
+        "IsRequired": true
+      },
+      {
+        "Name": "toUpdate",
+        "Type": "Chinese_sale_api.DTO.UpdateDonorDTO",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.DonorController",
+    "Method": "GetDonorByEmailAsync",
+    "RelativePath": "api/Donor/byemail/{email}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "email",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.DonorController",
+    "Method": "GetDonorByGiftAsync",
+    "RelativePath": "api/Donor/bygift/{giftId}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "giftId",
+        "Type": "System.Int32",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.DonorController",
+    "Method": "GetDonorByNameAsync",
+    "RelativePath": "api/Donor/byname/{name}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "name",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

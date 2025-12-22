@@ -1,4 +1,6 @@
 using Chinese_sale_api.Data;
+using Chinese_sale_api.Repositories;
+using Chinese_sale_api.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -11,8 +13,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //DI
-builder.Services.AddDbContext<DBContext_CheineseSale>(options =>
-options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddScoped<IGiftRepository, GiftRepository>();
+builder.Services.AddScoped<IGiftService, GiftService>();
+builder.Services.AddScoped<IDonorRepository,DonorRepository>();
+builder.Services.AddScoped<IDonorService,DonorService>();
+builder.Services.AddDbContext<CheineseSale_DBContext>(options =>
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+
 
 var app = builder.Build();
 

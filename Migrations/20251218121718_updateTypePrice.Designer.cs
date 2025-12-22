@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Chinese_sale_api.Migrations
 {
-    [DbContext(typeof(DBContext_CheineseSale))]
+    [DbContext(typeof(CheineseSale_DBContext))]
     [Migration("20251218121718_updateTypePrice")]
     partial class updateTypePrice
     {
