@@ -2,6 +2,7 @@ using Chinese_sale_api.Data;
 using Chinese_sale_api.Repositories;
 using Chinese_sale_api.Services;
 using Microsoft.EntityFrameworkCore;
+using projectApiAngular.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +18,8 @@ builder.Services.AddScoped<IGiftRepository, GiftRepository>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IDonorRepository,DonorRepository>();
 builder.Services.AddScoped<IDonorService,DonorService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddDbContext<CheineseSale_DBContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
 

@@ -433,12 +433,19 @@
         ],
         "parameters": [
           {
+            "name": "name",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
             "name": "donorId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer",
-              "format": "int32"
+              "type": "string"
             }
           }
         ],
@@ -481,7 +488,7 @@
         "type": "object",
         "properties": {
           "name": {
-            "maxLength": 100,
+            "maxLength": 50,
             "minLength": 1,
             "type": "string"
           }
@@ -520,17 +527,20 @@
           "description",
           "donorId",
           "imagePath",
-          "name"
+          "name",
+          "price"
         ],
         "type": "object",
         "properties": {
           "name": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 100,
+            "minLength": 1,
+            "type": "string"
           },
           "description": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
           },
           "categoryId": {
             "type": "integer",
@@ -545,8 +555,9 @@
             "format": "int32"
           },
           "imagePath": {
-            "type": "string",
-            "nullable": true
+            "maxLength": 200,
+            "minLength": 1,
+            "type": "string"
           }
         },
         "additionalProperties": false
@@ -555,15 +566,19 @@
         "type": "object",
         "properties": {
           "name": {
+            "maxLength": 50,
             "type": "string",
             "nullable": true
           },
           "email": {
             "type": "string",
+            "format": "email",
             "nullable": true
           },
           "phone": {
+            "maxLength": 15,
             "type": "string",
+            "format": "tel",
             "nullable": true
           }
         },
@@ -573,10 +588,12 @@
         "type": "object",
         "properties": {
           "name": {
+            "maxLength": 100,
             "type": "string",
             "nullable": true
           },
           "description": {
+            "maxLength": 200,
             "type": "string",
             "nullable": true
           },
@@ -596,6 +613,7 @@
             "nullable": true
           },
           "imagePath": {
+            "maxLength": 200,
             "type": "string",
             "nullable": true
           }

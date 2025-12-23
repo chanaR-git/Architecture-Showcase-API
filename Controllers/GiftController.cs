@@ -36,14 +36,16 @@ namespace Chinese_sale_api.Controllers
             return Ok(res);
         }
         [HttpGet("bydonor/{donorId}")]
-        public async Task<IActionResult> GetGiftByDonorAsync([FromRoute] int donorId)
+        public async Task<IActionResult> GetGiftByDonorAsync([FromRoute] string name)
         {
-            var res = await _service.GetGiftByDonorAsync(donorId);
+            var res = await _service.GetGiftByDonorAsync(name);
             return res is null ? NotFound() : Ok(res);
         }
         [HttpPost]
         public async Task<IActionResult> AddGiftAsync([FromBody] CreateGiftDTO g)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             try
             {
                 var res = await _service.AddGiftAsync(g);
@@ -57,6 +59,8 @@ namespace Chinese_sale_api.Controllers
         [HttpPut]
         public async Task<IActionResult> UpdateGiftAsync([FromRoute] string name, [FromBody] UpdateGiftDTO updatedGift)
         {
+            if (!ModelState.IsValid)
+                return BadRequest(ModelState);
             try
             {
                 var res = _service.UpdateGiftAsync(name, updatedGift);

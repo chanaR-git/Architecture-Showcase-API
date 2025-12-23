@@ -438,3 +438,4 @@ M:\web\project_API_Angular\ChineseSale_API\obj\Debug\net8.0\refint\Chinese_sale_
 M:\web\project_API_Angular\ChineseSale_API\obj\Debug\net8.0\Chinese_sale_api.pdb
 M:\web\project_API_Angular\ChineseSale_API\obj\Debug\net8.0\Chinese_sale_api.genruntimeconfig.cache
 M:\web\project_API_Angular\ChineseSale_API\obj\Debug\net8.0\ref\Chinese_sale_api.dll
+M:\web\project_API_Angular\ChineseSale_API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt

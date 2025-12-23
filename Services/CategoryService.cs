@@ -24,6 +24,7 @@ namespace Chinese_sale_api.Services
         //post
         public async Task<ReadCategoryDto> AddCategory(CreateCategoryDto category)
         {
+
             var entity = new Category
             {
                 Name = category.Name

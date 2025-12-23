@@ -261,8 +261,13 @@
     "Order": 0,
     "Parameters": [
       {
+        "Name": "name",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
         "Name": "donorId",
-        "Type": "System.Int32",
+        "Type": "",
         "IsRequired": true
       }
     ],

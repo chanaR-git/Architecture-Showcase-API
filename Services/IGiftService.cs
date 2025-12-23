@@ -7,7 +7,7 @@ namespace Chinese_sale_api.Services
         Task<ReadGiftDTO?> AddGiftAsync(CreateGiftDTO g);
         Task<ReadGiftDTO?> DeleteGiftAsync(string name);
         Task<IEnumerable<ReadGiftDTO>> getByNumBuyersAsync(int count);
-        Task<IEnumerable<ReadGiftDTO>?> GetGiftByDonorAsync(int DonorId);
+        Task<IEnumerable<ReadGiftDTO>?> GetGiftByDonorAsync(string name);
         Task<ReadGiftDTO?> GetGiftByNameAsync(string name);
         Task<IEnumerable<ReadGiftDTO>> GetGiftsAsync();
         Task<ReadGiftDTO?> UpdateGiftAsync(string name, UpdateGiftDTO updatedGift);

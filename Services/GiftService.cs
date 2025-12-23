@@ -33,6 +33,7 @@ namespace Chinese_sale_api.Services
             return gifts is null ? Enumerable.Empty<ReadGiftDTO>()
                                  : gifts.Select(ToReadDto);
         }
+
         public async Task<ReadGiftDTO?> AddGiftAsync(CreateGiftDTO g)
         {
             Gift newGift = new()
@@ -87,10 +88,9 @@ namespace Chinese_sale_api.Services
             return gift is null ? null : ToReadDto(gift);
         }
 
-        //שיניתי לפי idDonor
-        public async Task<IEnumerable<ReadGiftDTO>?> GetGiftByDonorAsync(int DonorId)
+        public async Task<IEnumerable<ReadGiftDTO>?> GetGiftByDonorAsync(string name)
         {
-            var gifts = await _repository.GetGiftByDonorAsync(DonorId);
+            var gifts = await _repository.GetGiftByDonorAsync(name);
             return (gifts is null || gifts.Count() == 0) ? null : gifts.Select(ToReadDto);
         }
 

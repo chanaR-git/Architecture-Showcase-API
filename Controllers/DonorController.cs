@@ -1,6 +1,7 @@
 ﻿using Chinese_sale_api.DTO;
 using Chinese_sale_api.Services;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 
 namespace Chinese_sale_api.Controllers
@@ -53,6 +54,10 @@ namespace Chinese_sale_api.Controllers
         [HttpPost]
         public async Task<IActionResult> AddDonorAsync([FromBody] CreateDonorDTO newDonor)
         {
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
             try
             {
                 var addDonor = await _service.AddDonorAsync(newDonor);
@@ -66,13 +71,17 @@ namespace Chinese_sale_api.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteDonorAsync([FromRoute] int id)
         {
-            var deletedDonor = _service.DeleteDonorAsync(id);
+            var deletedDonor = await _service.DeleteDonorAsync(id);
             return deletedDonor is null ? NotFound() : Ok(deletedDonor);
         }
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateDonorAsync([FromRoute] int id, [FromBody] UpdateDonorDTO toUpdate)
         {
-            var updatedDonor = _service.UpdateDonorAsync(id, toUpdate);
+            if (!ModelState.IsValid)
+            {
+                return BadRequest(ModelState);
+            }
+            var updatedDonor = await _service.UpdateDonorAsync(id, toUpdate);
             return updatedDonor is null ? NotFound() : Ok(updatedDonor);
         }
     }

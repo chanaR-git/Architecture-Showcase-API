@@ -19,6 +19,7 @@ namespace Chinese_sale_api.Repositories
         }
         public async Task<Gift> AddGiftAsync(Gift gift)
         {
+         
             // Validate foreign keys to avoid FK constraint errors
             if (!await _context.Categories.AnyAsync(c => c.Id == gift.CategoryId))
                 throw new ArgumentException($"no such category :(");
@@ -108,9 +109,9 @@ namespace Chinese_sale_api.Repositories
         {
             return await _context.Gifts.FirstOrDefaultAsync(d => d.Name == name);
         }
-        public async Task<IEnumerable<Gift>?> GetGiftByDonorAsync(int DonorId)
+        public async Task<IEnumerable<Gift>?> GetGiftByDonorAsync(string name)
         {
-            return await _context.Gifts.Include(g=>g.Donor).Where(g => g.Donor.Id == DonorId).ToListAsync();
+            return await _context.Gifts.Include(g=>g.Donor).Where(g => g.Donor.Name == name).ToListAsync();
         }
         public async Task<IEnumerable<Gift>?> getByNumBuyers(int count)
         {
