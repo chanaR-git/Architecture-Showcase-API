@@ -18,7 +18,7 @@ builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IDonorRepository,DonorRepository>();
 builder.Services.AddScoped<IDonorService,DonorService>();
 builder.Services.AddDbContext<CheineseSale_DBContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
 
 
 var app = builder.Build();

@@ -6,11 +6,11 @@
         
         //customer
         public int CustomerId { get; set; }
-        public Customer Customer { get; set; }
+        public required User Customer { get; set; }
 
         public int GiftId { get; set; }
-        public Gift Gift { get; set; }
+        public required Gift Gift { get; set; }
 
-        public DateTime PurchDate { get; set; }
+        public required DateTime PurchDate { get; set; }
     }
 }

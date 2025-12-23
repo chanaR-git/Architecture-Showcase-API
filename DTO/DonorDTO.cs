@@ -5,30 +5,34 @@ namespace Chinese_sale_api.DTO
     public class CreateDonorDTO
     {
         [Required]
-        public string Name { get; set; }
+        [MaxLength(50)]
+        public required string Name { get; set; }
         [Required]
-        public string Email { get; set; }
+        [EmailAddress]
+        public required string Email { get; set; }
         [Required]
-        public string Phone { get; set; }
+        [Phone]
+        public required string Phone { get; set; }
 
     }
     public class UpdateDonorDTO
     {
-        
+        [MaxLength(50)]
         public string? Name { get; set; }
-        
+
+        [EmailAddress]
         public string? Email { get; set; }
-        
+
+        [Phone]
+        [MaxLength(15)]
         public string? Phone { get; set; }
     }
 
       public class ReadDonorDTO
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-
-        public string Email { get; set; }
-
-        public string Phone { get; set; }
+        public required  int Id { get; set; }
+        public required string Name { get; set; }
+        public required string Email { get; set; }
+        public required string Phone { get; set; }
     }
 }

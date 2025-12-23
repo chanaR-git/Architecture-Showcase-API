@@ -8,8 +8,9 @@ namespace Chinese_sale_api.Models
         public string Name { get; set; }
         
         [EmailAddress]
-        public string Email { get; set; }
-        public string Phone { get; set; }
-        public List<Gift> MyGifts { get; set; }
+        public required string Email { get; set; }
+        [Phone]
+        public required string Phone { get; set; }
+        public List<Gift>? MyGifts { get; set; }
     }
 }

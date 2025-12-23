@@ -6,32 +6,33 @@ namespace Chinese_sale_api.Data
     public class CheineseSale_DBContext : DbContext
     {
         public CheineseSale_DBContext(DbContextOptions<CheineseSale_DBContext> options) : base(options) { }
-        public DbSet<Customer> Users { get; set; }
+        public DbSet<User> Users { get; set; }
         public DbSet<Gift> Gifts { get; set; }
-        public DbSet<Manager> Managers { get; set; }
+        //public DbSet<Manager> Managers { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Donor> Donors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            //customer
-            modelBuilder.Entity<Customer>().HasKey(u => u.Id);
-            modelBuilder.Entity<Customer>().Property(u => u.Name).IsRequired().HasMaxLength(50);
-            modelBuilder.Entity<Customer>().Property(u => u.Password).IsRequired().HasMaxLength(70);
-            modelBuilder.Entity<Customer>().Property(u => u.Email).IsRequired().HasMaxLength(50);
-            modelBuilder.Entity<Customer>().Property(u => u.Phone).IsRequired().HasMaxLength(15);
+            //user
+            modelBuilder.Entity<User>().HasKey(u => u.Id);
+            modelBuilder.Entity<User>().Property(u => u.Name).IsRequired().HasMaxLength(50);
+            modelBuilder.Entity<User>().Property(u => u.Password).IsRequired().HasMaxLength(70);
+            modelBuilder.Entity<User>().Property(u => u.Email).IsRequired().HasMaxLength(50);
+            modelBuilder.Entity<User>().Property(u => u.Phone).IsRequired().HasMaxLength(15);
+            modelBuilder.Entity<User>().Property(u => u.Role).IsRequired();
 
-            modelBuilder.Entity<Customer>().HasIndex(u => u.Email).IsUnique();
+            modelBuilder.Entity<User>().HasIndex(u => u.Email).IsUnique();
             
             
-            //manager
-            modelBuilder.Entity<Manager>().HasKey(m => m.Id);
-            modelBuilder.Entity<Manager>().Property(m => m.Name).IsRequired().HasMaxLength(50);
-            modelBuilder.Entity<Manager>().Property(m => m.Password).IsRequired().HasMaxLength(70);
-            modelBuilder.Entity<Manager>().Property(m => m.Email).IsRequired().HasMaxLength(50);
+            ////manager
+            //modelBuilder.Entity<Manager>().HasKey(m => m.Id);
+            //modelBuilder.Entity<Manager>().Property(m => m.Name).IsRequired().HasMaxLength(50);
+            //modelBuilder.Entity<Manager>().Property(m => m.Password).IsRequired().HasMaxLength(70);
+            //modelBuilder.Entity<Manager>().Property(m => m.Email).IsRequired().HasMaxLength(50);
 
-            modelBuilder.Entity<Manager>().HasIndex(m => m.Email).IsUnique();
+            //modelBuilder.Entity<Manager>().HasIndex(m => m.Email).IsUnique();
 
             
             //donor
