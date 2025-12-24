@@ -4,71 +4,68 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Chinese_sale_api.Repositories
 {
-    public class PurchasesRepository
+    public class PurchasesRepository : IPurchasesRepository
     {
         private readonly CheineseSale_DBContext _context;
         public PurchasesRepository(CheineseSale_DBContext cntx)
         {
             _context = cntx;
         }
-
+        //get by gift name
         public async Task<IEnumerable<Purchase>> GetPurchasesByGiftAsync(string name)
         {
             var purchases = await _context.Purchases.Include(p => p.Gift).Where(p => p.Gift.Name.Equals(name)).ToListAsync();
             return purchases;
         }
 
+        //get buyers details
         public async Task<IEnumerable<Purchase>> GetBuyersDetailsAsync()
         {
             var buyers = await _context.Purchases.Include(p => p.Customer).ToListAsync();
             return buyers;
         }
-        public async Task<IEnumerable<Purchase>> BestSellersAsync(Purchase purchase)
-        {
-            var counts = await _context.Purchases
-                                .GroupBy(p => p.GiftId)
-                                .Select(g => new { GiftId = g.Key, Count = g.Count() })
-                                .ToListAsync();
 
-            if (counts.Count == 0)
-                return Enumerable.Empty<Purchase>();
-
-            // Determine max count and the gift ids that have that count
-            var maxCount = counts.Max(c => c.Count);
-            var bestGiftIds = counts.Where(c => c.Count == maxCount).Select(c => c.GiftId).ToList();
-
-            // Return all purchases for those best-selling gifts. Include navigation properties as needed.
-            var purchases = await _context.Purchases
-                .Include(p => p.Gift)
-                .Include(p => p.Customer)
-                .Where(p => bestGiftIds.Contains(p.GiftId))
-                .ToListAsync();
-
-            return purchases;
-    }
         //sort by sellings
-       public async Task<IEnumerable<Purchase>> GetPurchasesSortedBySellingsAsync()
+        public async Task<IEnumerable<Purchase>> GetPurchasesSortedBySellingsAsync()
         {
-            var grpsGiftsByCount = await _context.Purchases
-                                .GroupBy(p => p.GiftId)
-                                .Select(g=> new { GiftId = g.Key, Count = g.Count()})
-                                .OrderByDescending(g=>g.Count)
-                                .ToListAsync();
+            var sortedPurchases = await _context.Purchases
+                                        .GroupBy(p => p.GiftId)
+                                        .Select(g => new
+                                        {
+                                            GiftId = g.Key,
+                                            Count = g.Count(),
+                                            Purchases = g.ToList()
+                                        })
+                                        .OrderByDescending(g => g.Count)
+                                        .SelectMany(g => g.Purchases)
+                                        .Include(p => p.Gift)
+                                        .Include(p => p.Customer)
+                                        .ToListAsync();
 
-            return purchases;
+            return sortedPurchases;
         }
-        public async Task<IEnumerable<Purchase>> GetAllPurchasesAsync()
-    {
-        var purchases = await _context.Purchases
-                            .Include(p => p.Gift)
-                            .Include(p => p.Customer)
-                            
-                                .ToListAsync();
-            return purchases;
+        //sort by price
+        public async Task<IEnumerable<Purchase>> GetPurchasesSortedByPriceAsync()
+        {
+            var sortedPurchases = await _context.Purchases
+                                        .Include(p => p.Gift)
+                                        .Include(p => p.Customer)
+                                        .OrderByDescending(p => p.Gift.Price)
+                                        .ToListAsync();
+            return sortedPurchases;
         }
 
+
+        //add purchase
         public async Task<Purchase> AddPurchaseAsync(Purchase purchase)
         {
+            // Validate foreign keys to avoid FK constraint errors
+            if (!await _context.Gifts.AnyAsync(g => g.Id == purchase.GiftId))
+                throw new ArgumentException($"no such gift :(");
+            if (!await _context.Users.AnyAsync(u => u.Id == purchase.CustomerId))
+                throw new ArgumentException($"no such customer :(");
+
+
             _context.Purchases.Add(purchase);
             try
             {

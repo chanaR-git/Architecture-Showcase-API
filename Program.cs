@@ -20,6 +20,8 @@ builder.Services.AddScoped<IDonorRepository,DonorRepository>();
 builder.Services.AddScoped<IDonorService,DonorService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
+builder.Services.AddScoped<IPurchasesRepository, PurchasesRepository>();
+builder.Services.AddScoped<IPurchasesService, PurchasesService>();
 builder.Services.AddDbContext<CheineseSale_DBContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
 
