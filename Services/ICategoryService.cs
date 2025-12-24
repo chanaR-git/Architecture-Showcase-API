@@ -7,6 +7,6 @@ namespace Chinese_sale_api.Services
         Task<CategoryDTO.ReadCategoryDto> AddCategory(CategoryDTO.CreateCategoryDto category);
         Task<CategoryDTO.ReadCategoryDto> DeleteCategory(int id);
         Task<IEnumerable<CategoryDTO.ReadCategoryDto>> GetAllCategories();
-        Task<CategoryDTO.ReadCategoryDto> UpdateCategory(int id, CategoryDTO.CreateCategoryDto category);
+        Task<CategoryDTO.ReadCategoryDto> UpdateCategory(int id, CategoryDTO.UpdateCategoryDto category);
     }
 }

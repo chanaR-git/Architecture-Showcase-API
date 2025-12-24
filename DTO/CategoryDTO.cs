@@ -12,8 +12,9 @@ namespace Chinese_sale_api.DTO
         }
         public class UpdateCategoryDto
         {
+            [Required]
             [MaxLength(50)]
-            public string? Name { get; set; }
+            public required string Name { get; set; }
         }
         public class ReadCategoryDto
         {

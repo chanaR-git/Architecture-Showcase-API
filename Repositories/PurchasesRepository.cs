@@ -29,20 +29,26 @@ namespace Chinese_sale_api.Repositories
         public async Task<IEnumerable<Purchase>> GetPurchasesSortedBySellingsAsync()
         {
             var sortedPurchases = await _context.Purchases
-                                        .GroupBy(p => p.GiftId)
-                                        .Select(g => new
-                                        {
-                                            GiftId = g.Key,
-                                            Count = g.Count(),
-                                            Purchases = g.ToList()
-                                        })
-                                        .OrderByDescending(g => g.Count)
-                                        .SelectMany(g => g.Purchases)
-                                        .Include(p => p.Gift)
-                                        .Include(p => p.Customer)
-                                        .ToListAsync();
+                .GroupBy(p => p.GiftId)
+                .Select(g => new
+                {
+                    GiftId = g.Key,
+                    Count = g.Count(),
+                    Purchases = g.Select(p => p) // לוקח את הפרטים מהרכישה
+                })
+                .OrderByDescending(g => g.Count)
+                .ToListAsync(); // ממשיכים ל-ToListAsync כאן
+                
+            //  להוציא את רכישות מהקבוצות
+            var purchasesList = sortedPurchases.SelectMany(g => g.Purchases);
 
-            return sortedPurchases;
+            var finalPurchases = await _context.Purchases
+                                    .Where(p => purchasesList.Select(x => x.Id).Contains(p.Id))
+                                    .Include(p => p.Gift)
+                                    .Include(p => p.Customer)
+                                    .ToListAsync();
+
+            return finalPurchases;
         }
         //sort by price
         public async Task<IEnumerable<Purchase>> GetPurchasesSortedByPriceAsync()
@@ -60,10 +66,10 @@ namespace Chinese_sale_api.Repositories
         public async Task<Purchase> AddPurchaseAsync(Purchase purchase)
         {
             // Validate foreign keys to avoid FK constraint errors
-            if (!await _context.Gifts.AnyAsync(g => g.Id == purchase.GiftId))
-                throw new ArgumentException($"no such gift :(");
             if (!await _context.Users.AnyAsync(u => u.Id == purchase.CustomerId))
                 throw new ArgumentException($"no such customer :(");
+            if (!await _context.Gifts.AnyAsync(g => g.Id == purchase.GiftId))
+                throw new ArgumentException($"no such gift :(");
 
 
             _context.Purchases.Add(purchase);

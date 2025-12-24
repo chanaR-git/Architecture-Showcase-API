@@ -34,7 +34,7 @@ namespace Chinese_sale_api.Services
         }
 
         //update
-        public async Task<ReadCategoryDto> UpdateCategory(int id, CreateCategoryDto category)
+        public async Task<ReadCategoryDto?> UpdateCategory(int id, UpdateCategoryDto category)
         {
             var entity = new Category
             {

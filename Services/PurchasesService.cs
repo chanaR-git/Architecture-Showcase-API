@@ -17,51 +17,64 @@ namespace Chinese_sale_api.Services
             _repo = repo;
         }
 
-        private static PurchaseDto Map(Purchase p) =>
-            new PurchaseDto
+        private static ReadPurchaseDto Map(Purchase p) =>
+            new ReadPurchaseDto
             {
                 Id = p.Id,
                 CustomerId = p.CustomerId,
-                CustomerName = p.Customer?.Name,
-                CustomerEmail = p.Customer?.Email,
+                CustomerName = p.Customer.Name,
+                CustomerEmail = p.Customer.Email,
                 GiftId = p.GiftId,
-                GiftName = p.Gift?.Name,
-                GiftPrice = p.Gift?.Price,
+                GiftName = p.Gift.Name,
+                GiftPrice = p.Gift.Price,
                 PurchDate = p.PurchDate
             };
 
-        public async Task<PurchaseDto> AddPurchaseAsync(CreatePurchaseDto dto)
+        public async Task<ReadPurchaseDto> AddPurchaseAsync(CreatePurchaseDto dto)
         {
+            if (dto.PurchDate > DateTime.Now)
+                throw new ArgumentException("Purchase date cannot be in the future.");
+
             var entity = new Purchase
             {
                 CustomerId = dto.CustomerId,
                 GiftId = dto.GiftId,
-                PurchDate = dto.PurchDate ?? DateTime.UtcNow
+                PurchDate = dto.PurchDate
             };
-
-            var saved = await _repo.AddPurchaseAsync(entity);
-            return Map(saved);
+            try
+            {
+                var saved = await _repo.AddPurchaseAsync(entity);
+                return Map(saved);
+            }
+            catch (ArgumentException ex)
+            {
+                throw new ArgumentException(ex.Message);
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
+            }
         }
 
-        public async Task<IEnumerable<PurchaseDto>> GetBuyersDetailsAsync()
+        public async Task<IEnumerable<ReadPurchaseDto>> GetBuyersDetailsAsync()
         {
             var items = await _repo.GetBuyersDetailsAsync();
-            return items.Select(Map);
+            return  items.Select(Map);
         }
 
-        public async Task<IEnumerable<PurchaseDto>> GetPurchasesByGiftAsync(string name)
+        public async Task<IEnumerable<ReadPurchaseDto>> GetPurchasesByGiftAsync(string name)
         {
             var items = await _repo.GetPurchasesByGiftAsync(name);
             return items.Select(Map);
         }
 
-        public async Task<IEnumerable<PurchaseDto>> GetPurchasesSortedBySellingsAsync()
+        public async Task<IEnumerable<ReadPurchaseDto>> GetPurchasesSortedBySellingsAsync()
         {
             var items = await _repo.GetPurchasesSortedBySellingsAsync();
             return items.Select(Map);
         }
 
-        public async Task<IEnumerable<PurchaseDto>> GetPurchasesSortedByPriceAsync()
+        public async Task<IEnumerable<ReadPurchaseDto>> GetPurchasesSortedByPriceAsync()
         {
             var items = await _repo.GetPurchasesSortedByPriceAsync();
             return items.Select(Map);

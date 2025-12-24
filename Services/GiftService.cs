@@ -23,6 +23,8 @@ namespace Chinese_sale_api.Services
                 Description = g.Description,
                 Price = g.Price,
                 ImagePath = g.ImagePath,
+                CategoryId = g.CategoryId,
+                DonorId = g.DonorId,
                 CategoryName = g.Category.Name,
                 DonorName = g.Donor.Name
             };

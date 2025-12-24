@@ -1,3 +1,4 @@
+using Chinese_sale_api.DTO;
 using Chinese_sale_api.DTOs;
 using Chinese_sale_api.Services;
 using Microsoft.AspNetCore.Mvc;
@@ -17,35 +18,35 @@ namespace Chinese_sale_api.Controllers
         }
 
         [HttpGet("buyers")]
-        public async Task<ActionResult<IEnumerable<PurchaseDto>>> GetBuyers()
+        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetBuyersDetailsAsync()
         {
             var items = await _service.GetBuyersDetailsAsync();
             return Ok(items);
         }
 
         [HttpGet("gift/{name}")]
-        public async Task<ActionResult<IEnumerable<PurchaseDto>>> GetByGift(string name)
+        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetByGift(string name)
         {
             var items = await _service.GetPurchasesByGiftAsync(name);
             return Ok(items);
         }
 
         [HttpGet("sorted/sellings")]
-        public async Task<ActionResult<IEnumerable<PurchaseDto>>> GetSortedBySellings()
+        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetSortedBySellings()
         {
             var items = await _service.GetPurchasesSortedBySellingsAsync();
             return Ok(items);
         }
 
         [HttpGet("sorted/price")]
-        public async Task<ActionResult<IEnumerable<PurchaseDto>>> GetSortedByPrice()
+        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetSortedByPrice()
         {
             var items = await _service.GetPurchasesSortedByPriceAsync();
             return Ok(items);
         }
 
         [HttpPost]
-        public async Task<ActionResult<PurchaseDto>> Create([FromBody] CreatePurchaseDto dto)
+        public async Task<ActionResult<ReadPurchaseDto>> Create([FromBody] CreatePurchaseDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

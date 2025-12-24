@@ -54,7 +54,7 @@ namespace Chinese_sale_api.Controllers
         }
         //update
         [HttpPut("{id}")]
-        public async Task<IActionResult> UpdateCategory(int id, [FromBody] CreateCategoryDto category)
+        public async Task<IActionResult> UpdateCategory(int id, [FromBody] UpdateCategoryDto category)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

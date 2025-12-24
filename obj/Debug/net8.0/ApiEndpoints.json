@@ -56,7 +56,7 @@
       },
       {
         "Name": "category",
-        "Type": "Chinese_sale_api.DTO.CategoryDTO\u002BCreateCategoryDto",
+        "Type": "Chinese_sale_api.DTO.CategoryDTO\u002BUpdateCategoryDto",
         "IsRequired": true
       }
     ],
@@ -304,5 +304,117 @@
       }
     ],
     "ReturnTypes": []
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.PurchasesController",
+    "Method": "Create",
+    "RelativePath": "api/Purchases",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "dto",
+        "Type": "Chinese_sale_api.DTOs.CreatePurchaseDto",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "Chinese_sale_api.DTOs.ReadPurchaseDto",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.PurchasesController",
+    "Method": "GetBuyersDetailsAsync",
+    "RelativePath": "api/Purchases/buyers",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Chinese_sale_api.DTOs.ReadPurchaseDto, Chinese_sale_api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.PurchasesController",
+    "Method": "GetByGift",
+    "RelativePath": "api/Purchases/gift/{name}",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "name",
+        "Type": "System.String",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Chinese_sale_api.DTOs.ReadPurchaseDto, Chinese_sale_api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.PurchasesController",
+    "Method": "GetSortedByPrice",
+    "RelativePath": "api/Purchases/sorted/price",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Chinese_sale_api.DTOs.ReadPurchaseDto, Chinese_sale_api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
+  },
+  {
+    "ContainingType": "Chinese_sale_api.Controllers.PurchasesController",
+    "Method": "GetSortedBySellings",
+    "RelativePath": "api/Purchases/sorted/sellings",
+    "HttpMethod": "GET",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [],
+    "ReturnTypes": [
+      {
+        "Type": "System.Collections.Generic.IEnumerable\u00601[[Chinese_sale_api.DTOs.ReadPurchaseDto, Chinese_sale_api, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]",
+        "MediaTypes": [
+          "text/plain",
+          "application/json",
+          "text/json"
+        ],
+        "StatusCode": 200
+      }
+    ]
   }
 ]
