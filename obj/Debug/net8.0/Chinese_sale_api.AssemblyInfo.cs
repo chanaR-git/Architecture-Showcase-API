@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Chinese_sale_api")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+a7e5a8116220b642ef37947e69a0cc65b1b684a6")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+dd0701685d6f866ca7073e55093cdc68fb4081b6")]
 [assembly: System.Reflection.AssemblyProductAttribute("Chinese_sale_api")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Chinese_sale_api")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

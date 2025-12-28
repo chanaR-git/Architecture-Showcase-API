@@ -20,18 +20,24 @@ namespace Chinese_sale_api.DTO
         [Required]
         [MaxLength(15)]
         public required string Phone { get; set; }
-        public required CustomerRole Role { get; set; }= CustomerRole.User;
     }
     public class ReadUserDto
     {
         public required int Id { get; set; }
         public required string Name { get; set; }
-        public required string Password { get; set; }
         [EmailAddress]
         public required string Email { get; set; }
         [Phone]
         public required string Phone { get; set; }
-        public required CustomerRole Role { get; set; }
+        public required string Role { get; set; }
     }
-
+    public class LoginDTO
+    {
+        [StrongPassword]
+        public required string Password { get; set; }
+        [EmailAddress]
+        [Required]
+        [MaxLength(50)]
+        public required string Email { get; set; }
+    }
 }

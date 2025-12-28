@@ -4,7 +4,9 @@ using Chinese_sale_api.Models;
 namespace Chinese_sale_api.Services
 {
     using BCrypt.Net;
-    public class UserService
+    using Microsoft.OpenApi.Extensions;
+
+    public class UserService : IUserService
     {
         private readonly Repositories.IUserRepository _userRepository;
         private readonly ITokenService _tokenService;
@@ -20,16 +22,15 @@ namespace Chinese_sale_api.Services
                 Id = user.Id,
                 Email = user.Email,
                 Name = user.Name,
-                Password = user.Password,
                 Phone = user.Phone,
-                Role = user.Role
+                Role = CustomerRole.User.GetDisplayName()
             };
         }
         //register user
         public async Task<ReadUserDto> RegisterUserAsync(CreateUserDto user)
         {
-            if(await _userRepository.GetUserByEmailAsync(user.Email) != null)
-                    throw new ArgumentException("Email already exists");
+            if (await _userRepository.GetUserByEmailAsync(user.Email) != null)
+                throw new ArgumentException("Email already exists");
             try
             {
                 User newUser = new User
@@ -38,7 +39,7 @@ namespace Chinese_sale_api.Services
                     Password = BCrypt.HashPassword(user.Password),
                     Email = user.Email,
                     Phone = user.Phone,
-                    Role = user.Role
+                    Role = CustomerRole.User
                 };
                 var created = await _userRepository.RegisterUserAsync(newUser);
                 return MapToReadUserDto(created);
@@ -55,7 +56,7 @@ namespace Chinese_sale_api.Services
             if (exists == null || !BCrypt.Verify(password, exists.Password))
                 throw new ArgumentException("Invalid email or password");
             //token
-            string token = _tokenService.GenerateToken(exists.Id,exists.Name,exists.Email,exists.Role,exists.Phone);
+            string token = _tokenService.GenerateToken(exists.Id, exists.Name, exists.Email, exists.Role, exists.Phone);
             return token;
         }
     }
