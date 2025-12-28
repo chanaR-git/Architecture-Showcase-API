@@ -7,9 +7,11 @@ namespace Chinese_sale_api.Services
     public class UserService
     {
         private readonly Repositories.IUserRepository _userRepository;
-        public UserService(Repositories.IUserRepository userRepository)
+        private readonly ITokenService _tokenService;
+        public UserService(Repositories.IUserRepository userRepository, ITokenService tokenService)
         {
             _userRepository = userRepository;
+            _tokenService = tokenService;
         }
         private ReadUserDto MapToReadUserDto(Models.User user)
         {
@@ -47,13 +49,14 @@ namespace Chinese_sale_api.Services
             }
         }
         //login user
-        public async Task<ReadUserDto> LoginUserAsync(string email, string password)
+        public async Task<string> LoginUserAsync(string email, string password)
         {
             var exists = await _userRepository.GetUserByEmailAsync(email);
             if (exists == null || !BCrypt.Verify(password, exists.Password))
                 throw new ArgumentException("Invalid email or password");
             //token
-            return MapToReadUserDto(exists);
+            string token = _tokenService.GenerateToken(exists.Id,exists.Name,exists.Email,exists.Role,exists.Phone);
+            return token;
         }
     }
 }

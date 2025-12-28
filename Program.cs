@@ -1,3 +1,4 @@
+using Chinese_sale_api.Configurations;
 using Chinese_sale_api.Data;
 using Chinese_sale_api.Repositories;
 using Chinese_sale_api.Services;
@@ -7,6 +8,7 @@ using projectApiAngular.Repositories;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -14,6 +16,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 //DI
+builder.Services.AddSingleton<ITokenService,TokenService>();
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IDonorRepository,DonorRepository>();
