@@ -12,6 +12,7 @@ namespace Chinese_sale_api.Data
         public DbSet<Purchase> Purchases { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<Donor> Donors { get; set; }
+        public DbSet<Basket> Baskets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -98,6 +99,11 @@ namespace Chinese_sale_api.Data
                 .WithMany(cus => cus.Purchases)
                 .HasForeignKey(p => p.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //basket
+            modelBuilder.Entity<Basket>().HasKey(b => b.Id);
+            modelBuilder.Entity<Basket>().Property(b => b.UserId).IsRequired();
+            modelBuilder.Entity<Basket>().Property(b => b.GiftId).IsRequired();
 
         }
     }
