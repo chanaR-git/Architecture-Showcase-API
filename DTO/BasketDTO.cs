@@ -5,9 +5,6 @@ namespace Chinese_sale_api.DTO
     public class CreateBasketDto
     {
         public int amount { get; set; } = 1;
-
-        [Required]
-        public int UserId { get; set; }
         [Required]
         public int GiftId { get; set; }
 
