@@ -15,7 +15,6 @@ namespace Chinese_sale_api.Controllers
         {
             _service = service;
         }
-
         [HttpGet("myBasket")]
         public async Task<IActionResult> GetMyBasketAsync()
         {
@@ -34,7 +33,6 @@ namespace Chinese_sale_api.Controllers
             }
         }
 
-   
         [HttpPost]
         public async Task<IActionResult> EnterToBasketAsync([FromBody] CreateBasketDto dto)
         {
@@ -76,8 +74,7 @@ namespace Chinese_sale_api.Controllers
             }
         }
 
-        // DELETE: api/basket/{id}
-        [HttpDelete("{id}")]
+S        [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBasketAsync([FromRoute] int id)
         {
             if (id <= 0) return BadRequest("Invalid id");

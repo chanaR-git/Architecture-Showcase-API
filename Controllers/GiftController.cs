@@ -1,5 +1,6 @@
 ﻿using Chinese_sale_api.DTO;
 using Chinese_sale_api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 
@@ -41,7 +42,9 @@ namespace Chinese_sale_api.Controllers
             var res = await _service.GetGiftByDonorAsync(name);
             return res is null ? NotFound() : Ok(res);
         }
+
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddGiftAsync([FromBody] CreateGiftDTO g)
         {
             if (!ModelState.IsValid)
@@ -57,13 +60,14 @@ namespace Chinese_sale_api.Controllers
             }
         }
         [HttpPut]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateGiftAsync([FromRoute] string name, [FromBody] UpdateGiftDTO updatedGift)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
             try
             {
-                var res = _service.UpdateGiftAsync(name, updatedGift);
+                var res = await _service.UpdateGiftAsync(name, updatedGift);
                 return Ok(res);
             }
             catch (Exception ex)
@@ -72,6 +76,7 @@ namespace Chinese_sale_api.Controllers
             }
         }
         [HttpDelete("{name}")]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> DeleteGiftAsync([FromRoute] string name)
         {
             var res = await _service.DeleteGiftAsync(name);

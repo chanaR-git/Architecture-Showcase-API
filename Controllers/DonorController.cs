@@ -1,11 +1,13 @@
 ﻿using Chinese_sale_api.DTO;
 using Chinese_sale_api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
 
 namespace Chinese_sale_api.Controllers
 {
+    [Authorize(Roles ="Admin")]
     [Route("api/[Controller]")]
     [ApiController]
     public class DonorController : ControllerBase

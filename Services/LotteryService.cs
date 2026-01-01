@@ -4,7 +4,7 @@ using Chinese_sale_api.Repositories;
 
 namespace Chinese_sale_api.Services
 {
-    public class LotteryService
+    public class LotteryService : ILotteryService
     {
         private readonly IPurchasesRepository _purchasesRepository;
         private readonly IGiftRepository _giftRepository;
@@ -36,7 +36,7 @@ namespace Chinese_sale_api.Services
                 Phone = winner.Phone
             };
         }
-        
+
         private async Task<int?> GetWinnerOfGift(string giftName)
         {
             var purchases = await _purchasesRepository.GetPurchasesByGiftAsync(giftName);

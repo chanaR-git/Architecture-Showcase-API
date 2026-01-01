@@ -1,9 +1,11 @@
 ﻿using Chinese_sale_api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using static Chinese_sale_api.DTO.CategoryDTO;
 
 namespace Chinese_sale_api.Controllers
 {
+    [Authorize(Roles ="Admin")]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoryController : ControllerBase
@@ -20,6 +22,7 @@ namespace Chinese_sale_api.Controllers
             var gifts = await _categoryService.GetAllCategories();
             return Ok(gifts);
         }
+        
         //post
         [HttpPost]
         public async Task<IActionResult> AddCategory([FromBody] CreateCategoryDto category)
