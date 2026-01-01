@@ -1,4 +1,5 @@
-﻿using Chinese_sale_api.Data;
+﻿using Chinese_sale_api.Controllers;
+using Chinese_sale_api.Data;
 using Chinese_sale_api.Models;
 using Microsoft.EntityFrameworkCore;
 using System.ComponentModel;
@@ -93,6 +94,19 @@ namespace Chinese_sale_api.Repositories
                 throw new InvalidOperationException("Error saving Gift to database. See inner exception for details.", ex);
             }
             return gift;
+        }
+        //update gift winner
+        public async Task<User?> UpdateGiftWinnerAsync(string name, int winnerId)
+        {
+            var gift = await _context.Gifts.FindAsync(name);
+            if (gift == null)
+            {
+                return null;
+            }
+            gift.WinnerId = winnerId;
+            await _context.SaveChangesAsync();
+            var winner = await _context.Users.FindAsync(winnerId);
+            return winner;
         }
         public async Task<Gift?> DeleteGiftAsync(string name)
         {
