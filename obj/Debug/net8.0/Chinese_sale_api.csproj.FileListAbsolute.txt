@@ -440,3 +440,6 @@ M:\web\project_API_Angular\ChineseSale_API\obj\Debug\net8.0\Chinese_sale_api.gen
 M:\web\project_API_Angular\ChineseSale_API\obj\Debug\net8.0\ref\Chinese_sale_api.dll
 M:\web\project_API_Angular\ChineseSale_API\obj\Debug\net8.0\staticwebassets.upToDateCheck.txt
 M:\web\project_API_Angular\ChineseSale_API\bin\Debug\net8.0\BCrypt.Net-Next.dll
+C:\Users\USER\Desktop\Projects\from github ט טבת\ChineseSale_API\obj\Debug\net8.0\Chinese_sale_api.dll
+C:\Users\USER\Desktop\Projects\from github ט טבת\ChineseSale_API\obj\Debug\net8.0\refint\Chinese_sale_api.dll
+C:\Users\USER\Desktop\Projects\from github ט טבת\ChineseSale_API\obj\Debug\net8.0\Chinese_sale_api.pdb

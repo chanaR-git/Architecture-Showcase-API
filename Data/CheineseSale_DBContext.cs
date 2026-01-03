@@ -1,5 +1,6 @@
 ﻿using Chinese_sale_api.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Collections.Generic;
 
 namespace Chinese_sale_api.Data
 {
@@ -11,6 +12,8 @@ namespace Chinese_sale_api.Data
         //public DbSet<Manager> Managers { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<Basket> Baskets { get; set; }
+
         public DbSet<Donor> Donors { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -98,6 +101,9 @@ namespace Chinese_sale_api.Data
                 .WithMany(cus => cus.Purchases)
                 .HasForeignKey(p => p.CustomerId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            //basket
+            //modelBuilder.Entity<Basket>().hasKey()
 
         }
     }
