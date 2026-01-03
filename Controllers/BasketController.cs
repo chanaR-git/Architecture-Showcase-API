@@ -74,7 +74,7 @@ namespace Chinese_sale_api.Controllers
             }
         }
 
-S        [HttpDelete("{id}")]
+       [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteBasketAsync([FromRoute] int id)
         {
             if (id <= 0) return BadRequest("Invalid id");

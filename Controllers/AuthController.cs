@@ -9,9 +9,11 @@ namespace Chinese_sale_api.Controllers
     public class AuthController : ControllerBase
     {
         private readonly IUserService _userService;
-        public AuthController(IUserService userService)
+        private readonly ILogger<AuthController> _logger;
+        public AuthController(IUserService userService,ILogger<AuthController> logger)
         {
             _userService = userService;
+            _logger = logger;
         }
         [HttpPost]
         [Route("login")]

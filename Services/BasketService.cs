@@ -13,15 +13,15 @@ namespace Chinese_sale_api.Services
     {
         private readonly IBasketRepository _basketRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
-        //private readonly CheineseSale_DBContext _context;
-        public BasketService(IBasketRepository basketRepository, IHttpContextAccessor httpContextAccessor)
+        private readonly ILogger<BasketService> _logger;
+        public BasketService(IBasketRepository basketRepository, IHttpContextAccessor httpContextAccessor, ILogger<BasketService> logger)
         {
             _basketRepository = basketRepository;
             _httpContextAccessor = httpContextAccessor;
-        }
+            _logger = logger;
+        }   
 
         //map to dto
-
         private static ReadBasketDto Map(Basket b)
         {
 
@@ -73,7 +73,11 @@ namespace Chinese_sale_api.Services
         public async Task<IEnumerable<ReadBasketDto>> GetMyBasket()
         {
             int userId = GetCurrentUserId();
+            _logger.LogInformation("Fetching basket for user {UserId}.", userId);
+
             var baskets = await _basketRepository.GetMyBasketAsync(userId);
+            _logger.LogInformation("Retrieved {Count} basket items for user {UserId}.", baskets.Count(), userId);
+            
             return baskets.Select(Map);
         }
 
@@ -81,6 +85,7 @@ namespace Chinese_sale_api.Services
         public async Task<ReadBasketDto> EnterToBasketAsync(CreateBasketDto basketDto)
         {
             int userId = GetCurrentUserId();
+            _logger.LogInformation("User {UserId} is adding gift {GiftId} amount {Amount} to basket.", userId, basketDto.GiftId, basketDto.amount);
 
             try
             {
@@ -94,33 +99,52 @@ namespace Chinese_sale_api.Services
                 };
 
                 var basket = await _basketRepository.EnterToBasketAsync(entity);
+                _logger.LogInformation("Gift {GiftId} added to basket for user {UserId} with basket id {BasketId}.", basket.GiftId, userId, basket.Id);
                 return Map(basket);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "Error occurred while adding gift {GiftId} to basket for user {UserId}.", basketDto.GiftId, userId);
                 throw new Exception(ex.Message);
             }
 
 
         }
+        
         //update amount
         public async Task<ReadBasketDto?> UpdateBasketAmountAsync(int id, int newAmount)
         {
+
             if (newAmount < 0 || newAmount > 1000)
+            {
+                _logger.LogWarning("Attempted to update basket {BasketId} with invalid amount {NewAmount}.", id, newAmount);
                 throw new ArgumentOutOfRangeException();
+            }
             var basket = await _basketRepository.UpdateBasketAmountAsync(id, newAmount);
             if (basket == null)
             {
+                _logger.LogWarning("Basket {BasketId} not found for update.", id);
                 return null;
             }
+            
+            _logger.LogInformation("Basket {BasketId} updated to new amount {NewAmount}.", id, newAmount);
             return Map(basket);
         }
+        
         //delete basket
         public async Task<ReadBasketDto?> DeleteBasketAsync(int id)
         {
+            _logger.LogInformation("Attempting to delete basket {BasketId}.", id);
             var basket = await _basketRepository.DeleteBasketAsync(id);
+            
+            if(basket == null)
+            {
+                _logger.LogWarning("Basket {BasketId} not found for deletion.", id);
+                return null;
+            }
 
-            return basket is null ? null : Map(basket);
+            _logger.LogInformation("Basket {BasketId} deleted successfully.", id);
+            return Map(basket);
         }
     }
 }

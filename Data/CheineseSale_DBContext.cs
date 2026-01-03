@@ -15,7 +15,6 @@ namespace Chinese_sale_api.Data
         public DbSet<Basket> Baskets { get; set; }
 
         public DbSet<Donor> Donors { get; set; }
-        public DbSet<Basket> Baskets { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -104,13 +103,10 @@ namespace Chinese_sale_api.Data
                 .OnDelete(DeleteBehavior.Restrict);
 
             //basket
-<<<<<<< HEAD
-            //modelBuilder.Entity<Basket>().hasKey()
-=======
             modelBuilder.Entity<Basket>().HasKey(b => b.Id);
             modelBuilder.Entity<Basket>().Property(b => b.UserId).IsRequired();
             modelBuilder.Entity<Basket>().Property(b => b.GiftId).IsRequired();
->>>>>>> f9835b44e5ea91d358345accf1837d118d2a944c
+
 
         }
     }

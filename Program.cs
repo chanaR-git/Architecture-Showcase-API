@@ -1,14 +1,30 @@
 using Chinese_sale_api.Configurations;
 using Chinese_sale_api.Data;
+using Chinese_sale_api.Middlewares;
 using Chinese_sale_api.Repositories;
 using Chinese_sale_api.Services;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using projectApiAngular.Repositories;
+using Serilog;
 using System.Text;
 
+//***
 var builder = WebApplication.CreateBuilder(args);
+
+// הגדרת Serilog
+Log.Logger = new LoggerConfiguration()
+    .MinimumLevel.Information()
+    .WriteTo.Console()
+    .WriteTo.File(
+        "Logs/app-log.txt",
+        rollingInterval: RollingInterval.Day)
+    .CreateLogger();
+
+// חיבור Serilog למערכת ה־Logging של ASP.NET
+builder.Host.UseSerilog();
+//***
 
 // Add services to the container.
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
@@ -63,6 +79,8 @@ builder.Services.AddDbContext<CheineseSale_DBContext>(options =>
 
 
 var app = builder.Build();
+
+app.UseMiddleware<RequestLog>();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
