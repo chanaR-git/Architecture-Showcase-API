@@ -29,7 +29,7 @@ namespace Chinese_sale_api.DTO
         public required string Email { get; set; }
         [Phone]
         public required string Phone { get; set; }
-        public required string Role { get; set; }
+        public string Role { get; set; } = CustomerRole.User.ToString();
     }
     public class LoginDTO
     {

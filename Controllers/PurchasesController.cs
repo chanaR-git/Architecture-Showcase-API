@@ -1,6 +1,7 @@
 using Chinese_sale_api.DTO;
 using Chinese_sale_api.DTOs;
 using Chinese_sale_api.Services;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ namespace Chinese_sale_api.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+   
     public class PurchasesController : ControllerBase
     {
         private readonly IPurchasesService _service;
@@ -18,6 +20,7 @@ namespace Chinese_sale_api.Controllers
         }
 
         [HttpGet("buyers")]
+        [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetBuyersDetailsAsync()
         {
             var items = await _service.GetBuyersDetailsAsync();
@@ -25,28 +28,32 @@ namespace Chinese_sale_api.Controllers
         }
 
         [HttpGet("gift/{name}")]
-        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetByGift(string name)
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetPurchaseByGift(string name)
         {
             var items = await _service.GetPurchasesByGiftAsync(name);
             return Ok(items);
         }
 
         [HttpGet("sorted/sellings")]
-        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetSortedBySellings()
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetPurchasesSortedBySellings()
         {
             var items = await _service.GetPurchasesSortedBySellingsAsync();
             return Ok(items);
         }
 
         [HttpGet("sorted/price")]
-        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetSortedByPrice()
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetPurchasesSortedByPrice()
         {
             var items = await _service.GetPurchasesSortedByPriceAsync();
             return Ok(items);
         }
 
         [HttpPost]
-        public async Task<ActionResult<ReadPurchaseDto>> Create([FromBody] CreatePurchaseDto dto)
+        [Authorize(Roles = "User")]
+        public async Task<ActionResult<ReadPurchaseDto>> Purchase([FromBody] CreatePurchaseDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);

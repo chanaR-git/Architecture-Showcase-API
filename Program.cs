@@ -8,15 +8,15 @@ using Microsoft.IdentityModel.Tokens;
 using projectApiAngular.Repositories;
 using System.Text;
 
-
-
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 if (jwtSettings is null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
+{
     throw new InvalidOperationException("Missing or invalid JwtSettings in configuration.");
+}
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

@@ -29,7 +29,7 @@ namespace Chinese_sale_api.Services
 
             var claims = new[]
             {
-                new Claim("id",userId.ToString()),
+                new Claim(ClaimTypes.NameIdentifier,userId.ToString()),
                 new Claim(ClaimTypes.Name, username),
                 new Claim(ClaimTypes.Role, CustomerRole.GetName(typeof(CustomerRole), role)!),// role cant be null cause it has a default user
                 new Claim(ClaimTypes.Email, useremail),
