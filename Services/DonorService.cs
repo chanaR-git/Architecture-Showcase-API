@@ -12,10 +12,11 @@ namespace Chinese_sale_api.Services
     public class DonorService : IDonorService
     {
         private readonly IDonorRepository _repository;
-
-        public DonorService(IDonorRepository repo)
+        private readonly ILogger<DonorService> _logger;
+        public DonorService(IDonorRepository repo, ILogger<DonorService> logger)
         {
             _repository = repo;
+            _logger = logger;
         }
         private static ReadDonorDTO ToReadDto(Donor d) =>
             new ReadDonorDTO
@@ -31,6 +32,7 @@ namespace Chinese_sale_api.Services
             var donors = await _repository.GetDonorsAsync();
             if (donors == null)
             {
+                _logger.LogWarning("donor repository returnrd no donors")
                 return Enumerable.Empty<ReadDonorDTO>();
             }
             return donors.Select(d => ToReadDto(d));

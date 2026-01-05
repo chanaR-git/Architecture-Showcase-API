@@ -7,7 +7,7 @@ namespace Chinese_sale_api.Controllers
 {
     [Authorize(Roles = "Admin")]
     [ApiController]
-    [Route("[apicontroller]")]
+    [Route("api/[controller]")]
     public class LotteryController : ControllerBase
     {
         private readonly ILotteryService _lotteryService;
@@ -19,6 +19,7 @@ namespace Chinese_sale_api.Controllers
         [HttpPost]
         public async Task<IActionResult> RunLottery(string giftName)
         {
+            
             try
             {
                 var result = await _lotteryService.RunLottery(giftName);

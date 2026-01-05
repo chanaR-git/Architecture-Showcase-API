@@ -36,7 +36,7 @@ namespace Chinese_sale_api.Controllers
             var res = await _service.getByNumBuyersAsync(num);
             return Ok(res);
         }
-        [HttpGet("bydonor/{donorId}")]
+        [HttpGet("bydonor/{name}")]
         public async Task<IActionResult> GetGiftByDonorAsync([FromRoute] string name)
         {
             var res = await _service.GetGiftByDonorAsync(name);
