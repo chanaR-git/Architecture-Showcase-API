@@ -28,7 +28,7 @@ namespace Chinese_sale_api.Controllers
         {
             if (id == 0) return BadRequest("id is required");
             var donor = await _service.GetDonorByIdAsync(id);
-            return Ok(donor);
+            return donor is null ? NotFound() :Ok(donor);
         }
         [HttpGet("byname/{name}")]
         public async Task<IActionResult> GetDonorByNameAsync([FromRoute] string name)
@@ -65,9 +65,9 @@ namespace Chinese_sale_api.Controllers
                 var addDonor = await _service.AddDonorAsync(newDonor);
                 return Ok(addDonor);
             }
-            catch (Exception ex)
+            catch (InvalidOperationException ex)
             {
-                return BadRequest(ex.Message);
+                return Conflict(ex.Message);
             }
         }
         [HttpDelete("{id}")]
@@ -83,8 +83,15 @@ namespace Chinese_sale_api.Controllers
             {
                 return BadRequest(ModelState);
             }
-            var updatedDonor = await _service.UpdateDonorAsync(id, toUpdate);
-            return updatedDonor is null ? NotFound() : Ok(updatedDonor);
+            try
+            {
+                var updatedDonor = await _service.UpdateDonorAsync(id, toUpdate);
+                return updatedDonor is null ? NotFound() : Ok(updatedDonor);
+            }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message);
+            }
         }
     }
 }

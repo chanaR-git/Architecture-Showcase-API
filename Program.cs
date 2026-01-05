@@ -74,7 +74,7 @@ builder.Services.AddScoped<IPurchasesRepository, PurchasesRepository>();
 builder.Services.AddScoped<IPurchasesService, PurchasesService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 
-builder.Services.AddDbContext<CheineseSale_DBContext>(options =>
+builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
         options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
 
 

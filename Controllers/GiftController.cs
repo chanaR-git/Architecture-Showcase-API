@@ -2,7 +2,6 @@
 using Chinese_sale_api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Infrastructure;
 
 namespace Chinese_sale_api.Controllers
 {
@@ -26,6 +25,9 @@ namespace Chinese_sale_api.Controllers
         [HttpGet("byname/{name}")]
         public async Task<IActionResult> GetGiftByName([FromRoute] string name)
         {
+            if (string.IsNullOrWhiteSpace(name))
+                return BadRequest("name is required");
+
             var res = await _service.GetGiftByNameAsync(name);
             return res is null ? NotFound() : Ok(res);
         }
@@ -33,6 +35,9 @@ namespace Chinese_sale_api.Controllers
         [HttpGet("bynumberofbuyers/{num}")]
         public async Task<IActionResult> getGiftByNumBuyersAsync([FromRoute] int num)
         {
+            if (num < 0)
+                return BadRequest("num must be >= 0");
+
             var res = await _service.getByNumBuyersAsync(num);
             return Ok(res);
         }
@@ -40,7 +45,7 @@ namespace Chinese_sale_api.Controllers
         public async Task<IActionResult> GetGiftByDonorAsync([FromRoute] string name)
         {
             var res = await _service.GetGiftByDonorAsync(name);
-            return res is null ? NotFound() : Ok(res);
+            return Ok(res);
         }
 
         [HttpPost]
@@ -54,12 +59,17 @@ namespace Chinese_sale_api.Controllers
                 var res = await _service.AddGiftAsync(g);
                 return Ok(res);
             }
-            catch (Exception ex)
+            catch (ArgumentException ex)
             {
                 return BadRequest(ex.Message);
             }
+            catch (InvalidOperationException ex)
+            {
+                return Conflict(ex.Message); // 409
+            }
+
         }
-        [HttpPut]
+        [HttpPut("{name}")]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> UpdateGiftAsync([FromRoute] string name, [FromBody] UpdateGiftDTO updatedGift)
         {
@@ -68,6 +78,8 @@ namespace Chinese_sale_api.Controllers
             try
             {
                 var res = await _service.UpdateGiftAsync(name, updatedGift);
+                if (res is null)
+                    return NotFound();
                 return Ok(res);
             }
             catch (Exception ex)

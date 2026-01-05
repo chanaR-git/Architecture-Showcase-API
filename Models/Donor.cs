@@ -5,7 +5,7 @@ namespace Chinese_sale_api.Models
     public class Donor
     {
         public int Id { get; set; }
-        public string Name { get; set; }
+        public required string Name { get; set; }
         
         [EmailAddress]
         public required string Email { get; set; }

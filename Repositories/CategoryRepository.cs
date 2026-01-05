@@ -8,9 +8,9 @@ namespace projectApiAngular.Repositories
 {
     public class CategoryRepository : ICategoryRepository
     {
-        private readonly CheineseSale_DBContext _context;
+        private readonly ChineseSaleDbContext _context;
 
-        public CategoryRepository(CheineseSale_DBContext context)
+        public CategoryRepository(ChineseSaleDbContext context)
         {
             _context = context;
         }
@@ -20,7 +20,10 @@ namespace projectApiAngular.Repositories
         {
             return await _context.Categories.ToListAsync();
         }
-
+        public async Task<Category?> GetCategoryById(int id)
+        {
+            return await _context.Categories.FindAsync(id);
+        }
         //post
         public async Task<Category> AddCategory(Category category)
         {

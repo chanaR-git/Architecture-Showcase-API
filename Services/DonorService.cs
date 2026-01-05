@@ -30,11 +30,6 @@ namespace Chinese_sale_api.Services
         public async Task<IEnumerable<ReadDonorDTO>> GetDonorsAsync()
         {
             var donors = await _repository.GetDonorsAsync();
-            if (donors == null)
-            {
-                _logger.LogWarning("donor repository returnrd no donors")
-                return Enumerable.Empty<ReadDonorDTO>();
-            }
             return donors.Select(d => ToReadDto(d));
         }
 
@@ -63,9 +58,12 @@ namespace Chinese_sale_api.Services
             return donor is null ? null : ToReadDto(donor);
         }
 
-        //עשיתי שינויים פה וברפוזיטורי, לשאול את אביגיל
         public async Task<ReadDonorDTO?> AddDonorAsync(CreateDonorDTO dto)
         {
+            var existing = await _repository.GetDonorByEmailAsync(dto.Email);
+            if (existing != null)
+                throw new InvalidOperationException("Email already exists");
+
             var donor = new Donor
             {
                 Name = dto.Name,
@@ -75,7 +73,7 @@ namespace Chinese_sale_api.Services
             };
 
             var created = await _repository.AddDonorAsync(donor);
-            return created is null ? null : ToReadDto(created);
+            return ToReadDto(created);
         }
 
         public async Task<ReadDonorDTO?> UpdateDonorAsync(int id, UpdateDonorDTO dto)
@@ -83,18 +81,21 @@ namespace Chinese_sale_api.Services
             var existing = await _repository.GetDonorByIdAsync(id);
             if (existing == null)
             {
+                _logger.LogWarning("Donor with id {Id} not found for update", id);
                 return null;
             }
-
-            // preserve existing values for null fields in DTO
-            var updatedEntity = new Donor
+            if (!string.IsNullOrWhiteSpace(dto.Email)) 
             {
-                Name = dto.Name ?? existing.Name,
-                Email = dto.Email ?? existing.Email,
-                Phone = dto.Phone ?? existing.Phone
-            };
+                var existingEmailDonor = await _repository.GetDonorByEmailAsync(dto.Email);
+                if (existingEmailDonor != null && existingEmailDonor.Id != id)
+                    throw new InvalidOperationException("Email already exists");
+            }
+            existing.Name = dto.Name ?? existing.Name;
+            existing.Email = dto.Email ?? existing.Email;
+            existing.Phone = dto.Phone ?? existing.Phone;
 
-            var updated = await _repository.UpdateDonorAsync(id, updatedEntity);
+            var updated = await _repository.UpdateDonorAsync(existing);
+
             return updated is null ? null : new ReadDonorDTO
             {
                 Id = updated.Id,

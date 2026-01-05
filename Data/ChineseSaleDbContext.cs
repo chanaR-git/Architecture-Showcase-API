@@ -4,9 +4,9 @@ using System.Collections.Generic;
 
 namespace Chinese_sale_api.Data
 {
-    public class CheineseSale_DBContext : DbContext
+    public class ChineseSaleDbContext : DbContext
     {
-        public CheineseSale_DBContext(DbContextOptions<CheineseSale_DBContext> options) : base(options) { }
+        public ChineseSaleDbContext(DbContextOptions<ChineseSaleDbContext> options) : base(options) { }
         public DbSet<User> Users { get; set; }
         public DbSet<Gift> Gifts { get; set; }
         //public DbSet<Manager> Managers { get; set; }

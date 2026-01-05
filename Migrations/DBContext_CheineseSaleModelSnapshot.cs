@@ -10,7 +10,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Chinese_sale_api.Migrations
 {
-    [DbContext(typeof(CheineseSale_DBContext))]
+    [DbContext(typeof(ChineseSaleDbContext))]
     partial class DBContext_CheineseSaleModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

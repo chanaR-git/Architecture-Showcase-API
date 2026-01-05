@@ -6,8 +6,8 @@ namespace Chinese_sale_api.Repositories
 {
     public class PurchasesRepository : IPurchasesRepository
     {
-        private readonly CheineseSale_DBContext _context;
-        public PurchasesRepository(CheineseSale_DBContext cntx)
+        private readonly ChineseSaleDbContext _context;
+        public PurchasesRepository(ChineseSaleDbContext cntx)
         {
             _context = cntx;
         }

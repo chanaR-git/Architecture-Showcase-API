@@ -5,8 +5,8 @@ namespace Chinese_sale_api.Repositories
 {
     public class UserRepository : IUserRepository
     {
-        private readonly Data.CheineseSale_DBContext _context;
-        public UserRepository(Data.CheineseSale_DBContext context)
+        private readonly Data.ChineseSaleDbContext _context;
+        public UserRepository(Data.ChineseSaleDbContext context)
         {
             _context = context;
         }

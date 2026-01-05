@@ -7,8 +7,8 @@ namespace projectApiAngular.Repositories
 {
     public class BasketRepository : IBasketRepository
     {
-        private readonly CheineseSale_DBContext _context;
-        public BasketRepository(CheineseSale_DBContext context)
+        private readonly ChineseSaleDbContext _context;
+        public BasketRepository(ChineseSaleDbContext context)
         {
             _context = context;
         }
