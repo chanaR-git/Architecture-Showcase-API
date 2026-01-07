@@ -10,8 +10,18 @@ using projectApiAngular.Repositories;
 using Serilog;
 using System.Text;
 
-//***
+
 var builder = WebApplication.CreateBuilder(args);
+
+//cors
+builder.Services.AddCors(options=>
+{
+    options.AddPolicy("allowlocalhost",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:4200").AllowAnyHeader().AllowAnyMethod();
+        });
+});
 
 // הגדרת Serilog
 Log.Logger = new LoggerConfiguration()
