@@ -1,5 +1,4 @@
-﻿using Microsoft.IdentityModel.Tokens;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 using System.Text.RegularExpressions;
 
 namespace Chinese_sale_api.Validations
@@ -29,10 +28,6 @@ namespace Chinese_sale_api.Validations
                 return new ValidationResult("The password must contain at least one digit.");
             }
 
-            if (!Regex.IsMatch(password, @"[!@#$%^&*(),.?""{}|<>]"))
-            {
-                return new ValidationResult("The password must contain at least one special character.");
-            }
             return ValidationResult.Success;
         }
     }
