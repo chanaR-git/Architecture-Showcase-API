@@ -91,6 +91,7 @@ builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
 var app = builder.Build();
 
 app.UseMiddleware<RequestLog>();
+app.UseCors("allowlocalhost");
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
