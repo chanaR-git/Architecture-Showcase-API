@@ -22,6 +22,7 @@ namespace Chinese_sale_api.Services
         private static ReadGiftDTO ToReadDto(Gift g) =>
             new ReadGiftDTO
             {
+                Id=g.Id,
                 Name = g.Name,
                 Description = g.Description,
                 Price = g.Price,
