@@ -86,13 +86,8 @@ namespace Chinese_sale_api.Services
                 if (category == null)
                     throw new ArgumentException("Category does not exist.");
             }
-            Donor? donor = null;
-            if (updatedGift.DonorId != null)
-            {
-                donor = await _donorRepository.GetDonorByIdAsync((int)updatedGift.DonorId);
-                if (donor == null)
-                    throw new ArgumentException("Donor does not exist.");
-            }
+
+
             // preserve existing values for null fields in updatedGift
             existing.Name = updatedGift.Name ?? existing.Name;
             existing.Description = updatedGift.Description ?? existing.Description;
@@ -100,13 +95,14 @@ namespace Chinese_sale_api.Services
             existing.Price = updatedGift.Price ?? existing.Price;
             existing.CategoryId = updatedGift.CategoryId ?? existing.CategoryId;
             existing.Category = category ?? existing.Category;
-            existing.Donor = donor ?? existing.Donor;
+            //existing.Donor = donor ?? existing.Donor;
             existing.DonorId = updatedGift.DonorId ?? existing.DonorId;
            
 
             var updated = await _repository.UpdateGiftAsync(existing);
             return updated is null ? null : ToReadDto(updated);
         }
+
         public async Task<ReadGiftDTO?> DeleteGiftAsync(string name)
         {
             var gift = await _repository.DeleteGiftAsync(name);
