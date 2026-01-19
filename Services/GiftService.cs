@@ -96,7 +96,7 @@ namespace Chinese_sale_api.Services
             existing.CategoryId = updatedGift.CategoryId ?? existing.CategoryId;
             existing.Category = category ?? existing.Category;
             //existing.Donor = donor ?? existing.Donor;
-            existing.DonorId = updatedGift.DonorId ?? existing.DonorId;
+            //existing.DonorId = updatedGift.DonorId ?? existing.DonorId;
            
 
             var updated = await _repository.UpdateGiftAsync(existing);
