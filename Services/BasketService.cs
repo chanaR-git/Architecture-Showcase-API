@@ -24,7 +24,6 @@ namespace Chinese_sale_api.Services
         //map to dto
         private static ReadBasketDto Map(Basket b)
         {
-
             return new ReadBasketDto
             {
                 Id = b.Id,

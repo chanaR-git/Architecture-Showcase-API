@@ -41,7 +41,9 @@ namespace projectApiAngular.Repositories
         //update amount
         public async Task<Basket?> UpdateBasketAmountAsync(int id, int newAmount)
         {
-            var basket = await _context.Baskets.FindAsync(id);
+            var basket = await _context.Baskets
+                                 .Include(b => b.User).Include(b=>b.gift).ThenInclude(g=>g.Category).Include(b=>b.gift).ThenInclude(g=>g.Donor)    // כולל את המשתמש
+                                 .FirstOrDefaultAsync(b => b.Id == id);
             if (basket == null)
             {
                 return null;
