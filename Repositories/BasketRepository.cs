@@ -19,7 +19,8 @@ namespace projectApiAngular.Repositories
             return await _context.Baskets
                 .Where(b => b.UserId == idUser)
                 .Include(b => b.User)
-                .Include(b => b.gift)
+                .Include(b => b.gift).ThenInclude(g=>g.Category)
+                .Include(b=>b.gift).ThenInclude(g=>g.Donor)
                 .ToListAsync();
         }
 

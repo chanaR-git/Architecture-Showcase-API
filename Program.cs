@@ -6,6 +6,7 @@ using Chinese_sale_api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using projectApiAngular.Repositories;
 using Serilog;
 using System.Text;
@@ -47,7 +48,36 @@ if (jwtSettings is null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+{
+    // Define the security settings (Security Definition)
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        Scheme = "Bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Please enter the token only (without the word Bearer)"
+    });
+
+    // Apply the definition to all requests (Security Requirement)
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            new string[] {}
+        }
+    });
+});
+
 
 // Authentication / JWT
 builder.Services.AddAuthentication(options =>
@@ -83,9 +113,12 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPurchasesRepository, PurchasesRepository>();
 builder.Services.AddScoped<IPurchasesService, PurchasesService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IBasketService, BasketService>();
+builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 var app = builder.Build();
