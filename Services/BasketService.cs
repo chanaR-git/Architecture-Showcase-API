@@ -87,16 +87,14 @@ namespace Chinese_sale_api.Services
             _logger.LogInformation("User {UserId} is adding gift {GiftId} amount {Amount} to basket.", userId, basketDto.GiftId, basketDto.amount);
 
             try
-            {
+            {           
                 var entity = new Basket
                 {
-
                     UserId = userId,
                     GiftId = basketDto.GiftId,
                     amount = basketDto.amount,
 
                 };
-
                 var basket = await _basketRepository.EnterToBasketAsync(entity);
                 _logger.LogInformation("Gift {GiftId} added to basket for user {UserId} with basket id {BasketId}.", basket.GiftId, userId, basket.Id);
                 return new ReadBasketDto { Id= basket.Id, amount = basket.amount, GiftId = basket.GiftId, UserId = userId};
@@ -106,8 +104,6 @@ namespace Chinese_sale_api.Services
                 _logger.LogError(ex, "Error occurred while adding gift {GiftId} to basket for user {UserId}.", basketDto.GiftId, userId);
                 throw new Exception(ex.Message);
             }
-
-
         }
         
         //update amount

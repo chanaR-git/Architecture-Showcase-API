@@ -29,8 +29,17 @@ namespace projectApiAngular.Repositories
         {
             if (!await _context.Gifts.AnyAsync(b => b.Id == basket.GiftId))
                 throw new ArgumentException($"Gift with id {basket.GiftId} does not exist.");
-      
-                _context.Baskets.Add(basket);
+
+            var existing = await _context.Baskets.FirstOrDefaultAsync(b => b.UserId == basket.UserId && b.GiftId == basket.GiftId);
+           
+            if(existing != null)
+            {
+                existing.amount += basket.amount;
+                await _context.SaveChangesAsync();
+                return existing;
+            }
+
+            _context.Baskets.Add(basket);
                 await _context.SaveChangesAsync();
                 return basket;
         }
