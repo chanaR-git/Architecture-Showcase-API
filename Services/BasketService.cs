@@ -131,7 +131,7 @@ namespace Chinese_sale_api.Services
         }
         
         //delete basket
-        public async Task<ReadBasketDto?> DeleteBasketAsync(int id)
+        public async Task<int?> DeleteBasketAsync(int id)
         {
             _logger.LogInformation("Attempting to delete basket {BasketId}.", id);
             var basket = await _basketRepository.DeleteBasketAsync(id);
@@ -143,7 +143,7 @@ namespace Chinese_sale_api.Services
             }
 
             _logger.LogInformation("Basket {BasketId} deleted successfully.", id);
-            return Map(basket);
+            return basket.Id;
         }
     }
 }
