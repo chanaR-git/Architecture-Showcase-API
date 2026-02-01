@@ -33,9 +33,6 @@ namespace projectApiAngular.Repositories
                 _context.Baskets.Add(basket);
                 await _context.SaveChangesAsync();
                 return basket;
-            
-
-
         }
 
         //update amount

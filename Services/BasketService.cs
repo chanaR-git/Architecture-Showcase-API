@@ -49,7 +49,7 @@ namespace Chinese_sale_api.Services
                     DonorName = b.gift.Donor.Name,
                     DonorId = b.gift.DonorId,
                     CategoryId = b.gift.CategoryId
-                }
+                },
             };
         }
 
@@ -81,7 +81,7 @@ namespace Chinese_sale_api.Services
         }
 
         //EnterToBasketAsync
-        public async Task<ReadBasketDto> EnterToBasketAsync(CreateBasketDto basketDto)
+        public async Task<ReadBasketDto?> EnterToBasketAsync(CreateBasketDto basketDto)
         {
             int userId = GetCurrentUserId();
             _logger.LogInformation("User {UserId} is adding gift {GiftId} amount {Amount} to basket.", userId, basketDto.GiftId, basketDto.amount);
@@ -99,7 +99,7 @@ namespace Chinese_sale_api.Services
 
                 var basket = await _basketRepository.EnterToBasketAsync(entity);
                 _logger.LogInformation("Gift {GiftId} added to basket for user {UserId} with basket id {BasketId}.", basket.GiftId, userId, basket.Id);
-                return Map(basket);
+                return new ReadBasketDto { Id= basket.Id, amount = basket.amount, GiftId = basket.GiftId, UserId = userId};
             }
             catch (Exception ex)
             {
