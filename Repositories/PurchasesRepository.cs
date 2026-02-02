@@ -21,7 +21,7 @@ namespace Chinese_sale_api.Repositories
         //get buyers details
         public async Task<IEnumerable<Purchase>> GetBuyersDetailsAsync()
         {
-            var buyers = await _context.Purchases.Include(p => p.Customer).ToListAsync();
+            var buyers = await _context.Purchases.Include(p => p.Customer).Include(p=>p.Gift).ToListAsync();
             return buyers;
         }
 
