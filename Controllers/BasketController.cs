@@ -89,5 +89,27 @@ namespace Chinese_sale_api.Controllers
                 return StatusCode(500, new { error = ex.Message });
             }
         }
+        
+        [HttpPost("buy-all")]
+        public async Task<IActionResult> BuyAllAsync()
+        {
+            try
+            {
+                var success = await _service.BuyAllBasketsAsync();
+                if (success)
+                    return Ok(success);
+                else
+                    return BadRequest( new { error = "Failed to complete purchase." });
+            }
+            catch (UnauthorizedAccessException)
+            {
+                return Unauthorized();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { error = ex.Message });
+            }
+        }
+
     }
 }

@@ -1,6 +1,7 @@
 ﻿using Chinese_sale_api.Data;
 using Chinese_sale_api.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Storage;
 
 
 namespace projectApiAngular.Repositories
@@ -69,6 +70,11 @@ namespace projectApiAngular.Repositories
             _context.Baskets.Remove(basket);
             await _context.SaveChangesAsync();
             return basket;
+        }
+
+        public async Task<IDbContextTransaction> beginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
         }
 
 

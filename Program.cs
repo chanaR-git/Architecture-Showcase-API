@@ -118,7 +118,7 @@ builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 var app = builder.Build();

@@ -1,5 +1,6 @@
 ﻿using Chinese_sale_api.Data;
 using Chinese_sale_api.DTO;
+using Chinese_sale_api.DTOs;
 using Chinese_sale_api.Models;
 using Microsoft.OpenApi.Extensions;
 using projectApiAngular.Repositories;
@@ -14,12 +15,15 @@ namespace Chinese_sale_api.Services
         private readonly IBasketRepository _basketRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<BasketService> _logger;
-        public BasketService(IBasketRepository basketRepository, IHttpContextAccessor httpContextAccessor, ILogger<BasketService> logger)
+        private readonly IPurchasesService _purchasesService;
+
+        public BasketService(IBasketRepository basketRepository, IPurchasesService purchasesService, IHttpContextAccessor httpContextAccessor, ILogger<BasketService> logger)
         {
             _basketRepository = basketRepository;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
-        }   
+            _purchasesService = purchasesService;
+        }
 
         //map to dto
         private static ReadBasketDto Map(Basket b)
@@ -76,7 +80,7 @@ namespace Chinese_sale_api.Services
 
             var baskets = await _basketRepository.GetMyBasketAsync(userId);
             _logger.LogInformation("Retrieved {Count} basket items for user {UserId}.", baskets.Count(), userId);
-            
+
             return baskets.Select(Map);
         }
 
@@ -87,7 +91,7 @@ namespace Chinese_sale_api.Services
             _logger.LogInformation("User {UserId} is adding gift {GiftId} amount {Amount} to basket.", userId, basketDto.GiftId, basketDto.amount);
 
             try
-            {           
+            {
                 var entity = new Basket
                 {
                     UserId = userId,
@@ -97,7 +101,7 @@ namespace Chinese_sale_api.Services
                 };
                 var basket = await _basketRepository.EnterToBasketAsync(entity);
                 _logger.LogInformation("Gift {GiftId} added to basket for user {UserId} with basket id {BasketId}.", basket.GiftId, userId, basket.Id);
-                return new ReadBasketDto { Id= basket.Id, amount = basket.amount, GiftId = basket.GiftId, UserId = userId};
+                return new ReadBasketDto { Id = basket.Id, amount = basket.amount, GiftId = basket.GiftId, UserId = userId };
             }
             catch (Exception ex)
             {
@@ -105,7 +109,7 @@ namespace Chinese_sale_api.Services
                 throw new Exception(ex.Message);
             }
         }
-        
+
         //update amount
         public async Task<ReadBasketDto?> UpdateBasketAmountAsync(int id, int newAmount)
         {
@@ -121,18 +125,18 @@ namespace Chinese_sale_api.Services
                 _logger.LogWarning("Basket {BasketId} not found for update.", id);
                 return null;
             }
-            
+
             _logger.LogInformation("Basket {BasketId} updated to new amount {NewAmount}.", id, newAmount);
             return Map(basket);
         }
-        
+
         //delete basket
         public async Task<int?> DeleteBasketAsync(int id)
         {
             _logger.LogInformation("Attempting to delete basket {BasketId}.", id);
             var basket = await _basketRepository.DeleteBasketAsync(id);
-            
-            if(basket == null)
+
+            if (basket == null)
             {
                 _logger.LogWarning("Basket {BasketId} not found for deletion.", id);
                 return null;
@@ -140,6 +144,52 @@ namespace Chinese_sale_api.Services
 
             _logger.LogInformation("Basket {BasketId} deleted successfully.", id);
             return basket.Id;
+        }
+
+        public async Task<bool> BuyAllBasketsAsync()
+        {
+            int userId = GetCurrentUserId();
+            _logger.LogInformation("Fetching basket for user {userId}.", userId);
+
+            var baskets = await _basketRepository.GetMyBasketAsync(userId);
+            _logger.LogInformation("Retrieved {Count} basket items for user {userId}.", baskets.Count(), userId);
+
+            if (!baskets.Any())
+            {
+                _logger.LogWarning("No basket items found for user {userId} to purchase.", userId);
+                return false;
+            }
+
+            //transaction
+            using var transaction = await _basketRepository.beginTransactionAsync();
+            try
+            {
+                foreach (var basket in baskets)
+                {
+                    for (int i = 0; i < basket.amount; i++)
+                    {
+                        var p = await _purchasesService.AddPurchaseAsync(new CreatePurchaseDto { CustomerId = userId, GiftId = basket.GiftId, PurchDate = DateTime.Now });
+                        if (p == null)
+                        {
+                            throw new Exception($"failed to purchase gift {basket.GiftId} in basket {basket.Id}");
+                        }
+                    }
+                    var deleted = await DeleteBasketAsync(basket.Id);
+                    if(deleted == null)
+                    {
+                        throw new Exception($"failed to delete basket {basket.Id}");
+                    }
+                }
+                await transaction.CommitAsync();
+                _logger.LogInformation("All basket items purchased successfully for user {userId}.", userId);
+                return true;
+
+            } catch(Exception ex){
+                await transaction.RollbackAsync();
+                _logger.LogError(ex, "purchase failed for user {userid} transaction rolled back",userId);
+                return false;
+            }
+
         }
     }
 }
