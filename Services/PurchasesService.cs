@@ -12,9 +12,11 @@ namespace Chinese_sale_api.Services
     public class PurchasesService : IPurchasesService
     {
         private readonly IPurchasesRepository _repo;
-        public PurchasesService(IPurchasesRepository repo)
+        private readonly ILogger<PurchasesService> _logger;
+        public PurchasesService(IPurchasesRepository repo, ILogger<PurchasesService> logger)
         {
             _repo = repo;
+            _logger = logger;
         }
 
         private static ReadPurchaseDto Map(Purchase p) =>
@@ -78,6 +80,21 @@ namespace Chinese_sale_api.Services
         {
             var items = await _repo.GetPurchasesSortedByPriceAsync();
             return items.Select(Map);
+        }
+
+        public async Task<decimal> GetTotalSalesRevenue()
+        {
+            _logger.LogInformation("Calculating total sales revenue.");
+
+            var purchases = await _repo.GetAllPurchasesAsync(); 
+            if (purchases == null || !purchases.Any())
+            {
+                _logger.LogWarning("No purchases found.");
+                return 0;
+            }
+
+            decimal totalRevenue = purchases.Sum(purchase => purchase.Gift.Price);  
+            return totalRevenue;
         }
     }
 }

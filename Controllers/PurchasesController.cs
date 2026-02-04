@@ -27,7 +27,7 @@ namespace Chinese_sale_api.Controllers
             return Ok(items);
         }
 
-        [HttpGet("gift/{name}")]
+        [HttpGet("bygift/{name}")]
         [Authorize(Roles = "Admin")]
         public async Task<ActionResult<IEnumerable<ReadPurchaseDto>>> GetPurchaseByGift(string name)
         {
@@ -49,6 +49,14 @@ namespace Chinese_sale_api.Controllers
         {
             var items = await _service.GetPurchasesSortedByPriceAsync();
             return Ok(items);
+        }
+        
+        [HttpGet("total-revenue")]
+        [Authorize(Roles = "Admin")]
+        public async Task<ActionResult<decimal>> GetTotalSalesRevenue()
+        {
+            var totalRevenue = await _service.GetTotalSalesRevenue();
+            return Ok(totalRevenue);
         }
 
         [HttpPost]

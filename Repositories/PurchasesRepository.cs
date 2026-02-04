@@ -11,12 +11,20 @@ namespace Chinese_sale_api.Repositories
         {
             _context = cntx;
         }
+        //get all purchases
+        public async Task<IEnumerable<Purchase>> GetAllPurchasesAsync()
+        {
+            var purchases = await _context.Purchases.Include(p => p.Gift).Include(p => p.Customer).ToListAsync();
+            return purchases;
+        }
+
         //get by gift name
         public async Task<IEnumerable<Purchase>> GetPurchasesByGiftAsync(string name)
         {
             var purchases = await _context.Purchases.Include(p => p.Gift).Where(p => p.Gift.Name.Equals(name)).ToListAsync();
             return purchases;
         }
+
 
         //get buyers details
         public async Task<IEnumerable<Purchase>> GetBuyersDetailsAsync()

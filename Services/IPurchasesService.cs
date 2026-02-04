@@ -7,6 +7,7 @@ namespace Chinese_sale_api.Services
 {
     public interface IPurchasesService
     {
+        Task<decimal> GetTotalSalesRevenue();
         Task<IEnumerable<ReadPurchaseDto>> GetPurchasesByGiftAsync(string name);
         Task<IEnumerable<ReadPurchaseDto>> GetBuyersDetailsAsync();
         Task<IEnumerable<ReadPurchaseDto>> GetPurchasesSortedBySellingsAsync();

@@ -13,7 +13,7 @@ namespace Chinese_sale_api.Services
             using (var writer = new StreamWriter(csvFilePath, false, Encoding.UTF8))
             using (var csv = new CsvWriter(writer, CultureInfo.InvariantCulture))
             {
-              
+
                 // כותב את הרשומות (כל הנתונים)
                 csv.WriteRecords(giftWinners);
                 csv.WriteComment($"Lottery #{numLottery}\n");
