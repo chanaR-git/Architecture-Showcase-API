@@ -7,5 +7,6 @@ namespace Chinese_sale_api.Services
         Task<IEnumerable<ReadUserDto?>> RunLottery();
         Task<List<GiftWinnerDto>> GetAllGiftWinners();
         Task<int> StartNewLottery();
+        Task<ReadUserDto?> RunLottery(string giftName);
     }
 }

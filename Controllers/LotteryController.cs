@@ -32,6 +32,21 @@ namespace Chinese_sale_api.Controllers
 
         }
 
+        [HttpPost("{giftName}")]
+        public async Task<IActionResult> RunLotteryForGift(string giftName)
+        {
+            try
+            {
+                var result = await _lotteryService.RunLottery(giftName);
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+
         [HttpGet("winners")]
         public async Task<IActionResult> GetAllGiftWinners()
         {

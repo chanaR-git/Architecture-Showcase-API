@@ -39,7 +39,10 @@ namespace Chinese_sale_api.Services
                 int? winnerId = await GetWinnerOfGift(gift.Name);
 
                 if (winnerId == null)
+                {
+                    _logger.LogWarning("No winner selected for gift: {GiftName} because there were no purchases.", gift.Name);
                     continue;
+                }
 
                 var winner = await _giftRepository.UpdateGiftWinnerAsync(gift.Name, winnerId.Value);
 
@@ -57,6 +60,37 @@ namespace Chinese_sale_api.Services
             }
 
             return winners;
+        }
+
+        public async Task<ReadUserDto?> RunLottery(string giftName)
+        {
+            _logger.LogInformation("starting lottery for gift {giftName}",giftName);
+            var gift = await _giftRepository.GetGiftByNameAsync(giftName);
+            if (gift == null)
+            {
+                throw new KeyNotFoundException($"Gift with name '{giftName}' not found.");
+            }
+
+            int? winnerId = await GetWinnerOfGift(gift.Name);
+            
+            if (winnerId == null)
+            {
+                _logger.LogWarning("No winner selected for gift: {GiftName} because there were no purchases.", gift.Name);
+                return null;
+            }
+
+            var winner = await _giftRepository.UpdateGiftWinnerAsync(gift.Name, winnerId.Value);
+            
+            if (winner == null)
+                throw new InvalidOperationException("Error updating gift winner.");
+
+            return new ReadUserDto
+            {
+                Id = winner.Id,
+                Name = winner.Name,
+                Email = winner.Email,
+                Phone = winner.Phone
+            };
         }
 
         private async Task<int?> GetWinnerOfGift(string giftName)
