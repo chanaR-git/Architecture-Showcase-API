@@ -29,6 +29,7 @@ namespace Chinese_sale_api.Repositories
             await _context.SaveChangesAsync();
             return gift;
         }
+        
         //update gift winner
         public async Task<User?> UpdateGiftWinnerAsync(string name, int winnerId)
         {
@@ -37,6 +38,12 @@ namespace Chinese_sale_api.Repositories
             {
                 return null;
             }
+            
+            if (gift.WinnerId != null)
+            {
+                throw new InvalidOperationException("It's immposible to do duplicate lotteries in one sale :(");
+            }
+
             gift.WinnerId = winnerId;
             await _context.SaveChangesAsync();
             var winner = await _context.Users.FindAsync(winnerId);
@@ -73,6 +80,18 @@ namespace Chinese_sale_api.Repositories
                         .Include(g => g.Purchases)
                         .Where(g => g.Purchases !=null && g.Purchases.Count == count)
                         .ToListAsync();
+        }
+
+        //start a new chinese sale
+        public async Task<int?> StartNewChineseSaleAsync()
+        {
+            var gifts = await _context.Gifts.ToListAsync();
+            foreach (var gift in gifts)
+            {
+                gift.WinnerId = null;
+            }
+            await _context.SaveChangesAsync();
+            return null;
         }
 
     }

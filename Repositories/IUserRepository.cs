@@ -6,5 +6,6 @@ namespace Chinese_sale_api.Repositories
     {
         Task<User> RegisterUserAsync(User user);
         Task<User?> GetUserByEmailAsync(string email);
+        Task<User?> GetUserByIdAsync(int id);
     }
 }

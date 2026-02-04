@@ -17,18 +17,45 @@ namespace Chinese_sale_api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> RunLottery(string giftName)
-        {
-            
+        public async Task<IActionResult> RunLottery()
+        {            
             try
             {
-                var result = await _lotteryService.RunLottery(giftName);
+                var result = await _lotteryService.RunLottery();
                 return Ok(result);
             }
-            catch(Exception ex) {
+            catch (Exception ex) {
                 return BadRequest(ex.Message);
             }
 
+        }
+
+        [HttpGet("winners")]
+        public async Task<IActionResult> GetAllGiftWinners()
+        {
+            try
+            {
+                var result = await _lotteryService.GetAllGiftWinners();
+                return Ok(result);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+        }
+
+        [HttpPut("newSale")]
+        public async Task<IActionResult> StartNewSale()
+        {
+            try
+            {
+               await _lotteryService.StartNewLottery();
+                return Ok("New sale started successfully.");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
     }

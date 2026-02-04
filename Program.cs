@@ -102,8 +102,6 @@ builder.Services.AddAuthentication(options =>
 });
 
 //DI
-builder.Services.AddSingleton<ITokenService,TokenService>();
-builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IGiftRepository, GiftRepository>();
 builder.Services.AddScoped<IGiftService, GiftService>();
 builder.Services.AddScoped<IDonorRepository,DonorRepository>();
@@ -113,12 +111,16 @@ builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IPurchasesRepository, PurchasesRepository>();
 builder.Services.AddScoped<IPurchasesService, PurchasesService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
+builder.Services.AddScoped<IBasketService, BasketService>();
+builder.Services.AddSingleton<ITokenService,TokenService>();
+builder.Services.AddScoped<ILotteryService, LotteryService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
 
 
 var app = builder.Build();

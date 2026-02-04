@@ -4,6 +4,8 @@ namespace Chinese_sale_api.Services
 {
     public interface ILotteryService
     {
-        Task<ReadUserDto?> RunLottery(string giftName);
+        Task<IEnumerable<ReadUserDto?>> RunLottery();
+        Task<List<GiftWinnerDto>> GetAllGiftWinners();
+        Task<int> StartNewLottery();
     }
 }

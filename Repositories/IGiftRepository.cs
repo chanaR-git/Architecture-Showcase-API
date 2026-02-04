@@ -12,5 +12,6 @@ namespace Chinese_sale_api.Repositories
         Task<Gift?> GetGiftByNameAsync(string name);
         Task<IEnumerable<Gift>> GetGiftsAsync();
         Task<User?> UpdateGiftWinnerAsync(string name, int winnerId);
+        Task<int?> StartNewChineseSaleAsync();
     }
 }
