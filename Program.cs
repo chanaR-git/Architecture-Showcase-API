@@ -117,6 +117,7 @@ builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddSingleton<ITokenService,TokenService>();
 builder.Services.AddScoped<ILotteryService, LotteryService>();
+builder.Services.AddScoped<IZIPService, ZIPService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<ChineseSaleDbContext>(options =>

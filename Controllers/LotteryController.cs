@@ -11,9 +11,11 @@ namespace Chinese_sale_api.Controllers
     public class LotteryController : ControllerBase
     {
         private readonly ILotteryService _lotteryService;
-        public LotteryController(ILotteryService lotteryService)
+        private readonly IZIPService _zipService;
+        public LotteryController(ILotteryService lotteryService, IZIPService zipService)
         {
             _lotteryService = lotteryService;
+            _zipService = zipService;
         }
 
         [HttpPost]
@@ -58,5 +60,31 @@ namespace Chinese_sale_api.Controllers
             }
         }
 
+
+        [HttpGet("download-winners-zip")]
+        public async Task<IActionResult> DownloadGiftWinnersAsZip()
+        {
+            var giftWinners = await _lotteryService.GetAllGiftWinners();
+
+            if (giftWinners == null || !giftWinners.Any())
+            {
+                return NotFound("No winners data to download.");
+            }
+
+            var csvFileName = "gift_winners.csv";
+            var csvFilePath = Path.Combine(Path.GetTempPath(), csvFileName);
+            _zipService.CreateCsvFile(giftWinners,LotteryService.CountLotteries, csvFilePath);
+
+            var zipFileName = "gift_winners.zip";
+            var zipFilePath = Path.Combine(Path.GetTempPath(), zipFileName);
+            _zipService.CreateZipFile(csvFilePath, zipFilePath);
+
+            System.IO.File.Delete(csvFilePath);
+
+            var fileBytes = await System.IO.File.ReadAllBytesAsync(zipFilePath);
+
+            // Use the correct overload for ControllerBase.File
+            return File(fileBytes, "application/zip", zipFileName);
+        }
     }
 }

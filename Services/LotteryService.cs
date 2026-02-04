@@ -1,6 +1,12 @@
 ﻿using Chinese_sale_api.DTO;
 using Chinese_sale_api.Models;
 using Chinese_sale_api.Repositories;
+using CsvHelper;
+using System.Formats.Asn1;
+using System.Globalization;
+using System.IO;
+using System.IO.Compression;
+using System.Text;
 
 namespace Chinese_sale_api.Services
 {
@@ -10,8 +16,8 @@ namespace Chinese_sale_api.Services
         private readonly IGiftRepository _giftRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<LotteryService> _logger;
-        private static int countLoterries = 0;
-
+        //private static int countLoterries = 0;
+        public static int CountLotteries { get; private set; } = 0;
 
         public LotteryService(IPurchasesRepository purchasesRepository, IGiftRepository giftRepository, ILogger<LotteryService> logger, IUserRepository userRepository)
         {
@@ -23,7 +29,7 @@ namespace Chinese_sale_api.Services
 
         public async Task<IEnumerable<ReadUserDto?>> RunLottery()
         {
-            _logger.LogInformation("Starting lottery run number {CountLoterries}", countLoterries);
+            _logger.LogInformation("Starting lottery run number {CountLoterries}", CountLotteries);
             List<ReadUserDto?> winners = new List<ReadUserDto?>();
 
             var gifts = await _giftRepository.GetGiftsAsync();
@@ -103,15 +109,16 @@ namespace Chinese_sale_api.Services
                     });
                 }
             }
-
+              
             return giftWinners;
         }
+
 
         public async Task<int> StartNewLottery()
         {
             _logger.LogInformation("Starting a new lottery round.");
             await _giftRepository.StartNewChineseSaleAsync();
-            return ++countLoterries;
+            return ++CountLotteries;
         }
     }
 }
