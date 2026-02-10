@@ -1,7 +1,7 @@
 ﻿using Chinese_sale_api.Models;
 using Microsoft.EntityFrameworkCore.Storage;
 
-namespace projectApiAngular.Repositories
+namespace Chinese_sale_api.Repositories
 {
     public interface IBasketRepository
     {

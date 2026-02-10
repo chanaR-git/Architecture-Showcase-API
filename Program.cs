@@ -24,7 +24,7 @@ builder.Services.AddCors(options=>
         });
 });
 
-// äâãøú Serilog
+// ï¿½ï¿½ï¿½ï¿½ï¿½ Serilog
 Log.Logger = new LoggerConfiguration()
     .MinimumLevel.Information()
     .WriteTo.Console()
@@ -33,7 +33,7 @@ Log.Logger = new LoggerConfiguration()
         rollingInterval: RollingInterval.Day)
     .CreateLogger();
 
-// çéáåø Serilog ìîòøëú äÎLogging ùì ASP.NET
+// ï¿½ï¿½ï¿½ï¿½ï¿½ Serilog ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½Logging ï¿½ï¿½ ASP.NET
 builder.Host.UseSerilog();
 //***
 
@@ -127,6 +127,7 @@ builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
 var app = builder.Build();
 
 app.UseMiddleware<RequestLog>();
+app.UseMiddleware<GiftAlreadyAsignedMiddleware>();
 app.UseCors("allowlocalhost");
 
 // Configure the HTTP request pipeline.

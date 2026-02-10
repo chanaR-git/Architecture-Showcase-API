@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Storage;
 
 
-namespace projectApiAngular.Repositories
+namespace Chinese_sale_api.Repositories
 {
     public class BasketRepository : IBasketRepository
     {

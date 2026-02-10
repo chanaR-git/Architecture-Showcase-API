@@ -3,10 +3,13 @@ using Chinese_sale_api.DTO;
 using Chinese_sale_api.DTOs;
 using Chinese_sale_api.Models;
 using Microsoft.OpenApi.Extensions;
-using projectApiAngular.Repositories;
+using Chinese_sale_api.Exceptions;
+
+using Chinese_sale_api.Repositories; 
 using System;
 using System.Data;
 using System.Security.Claims;
+using projectApiAngular.Repositories;
 
 namespace Chinese_sale_api.Services
 {
@@ -111,7 +114,7 @@ namespace Chinese_sale_api.Services
                 if (winner != null)
                 {
                     _logger.LogWarning("User {UserId} attempted to add gift {GiftId} to basket, but this gift already has a winner: {WinnerName}.", userId, basketDto.GiftId, winner.Name);
-                    throw new InvalidOperationException($"This gift already has a winner: {winner.Name}");
+                    throw new GiftAlreadyAsignedException(winner.Name);
                 }
 
                 var entity = new Basket
@@ -183,15 +186,15 @@ namespace Chinese_sale_api.Services
             }
 
             // Check if any gift in the basket has a winner
-            foreach (var basket in baskets)
-            {
-                var winner = await GetGiftWinnerAsync(basket.GiftId);
-                if (winner != null)
+                foreach (var basket in baskets)
                 {
-                    _logger.LogWarning("User {UserId} attempted to purchase gift {GiftId}, but this gift already has a winner: {WinnerName}.", userId, basket.GiftId, winner.Name);
-                    throw new InvalidOperationException($"Cannot purchase gift '{basket.gift.Name}' - it already has a winner: {winner.Name}");
+                    var winner = await GetGiftWinnerAsync(basket.GiftId);
+                    if (winner != null)
+                    {
+                        _logger.LogWarning("User {UserId} attempted to purchase gift {GiftId}, but this gift already has a winner: {WinnerName}.", userId, basket.GiftId, winner.Name);
+                        throw new GiftAlreadyAsignedException(winner.Name);
+                    }
                 }
-            }
 
             //transaction
             using var transaction = await _basketRepository.beginTransactionAsync();

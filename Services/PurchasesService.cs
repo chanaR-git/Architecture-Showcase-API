@@ -1,6 +1,7 @@
 using Chinese_sale_api.DTOs;
 using Chinese_sale_api.Models;
 using Chinese_sale_api.Repositories;
+using Chinese_sale_api.Exceptions;
 using Microsoft.EntityFrameworkCore;
 using System;
 using System.Collections.Generic;
@@ -13,9 +14,11 @@ namespace Chinese_sale_api.Services
     {
         private readonly IPurchasesRepository _repo;
         private readonly ILogger<PurchasesService> _logger;
-        public PurchasesService(IPurchasesRepository repo, ILogger<PurchasesService> logger)
+        private readonly IGiftRepository _giftRepository;
+        public PurchasesService(IPurchasesRepository repo, IGiftRepository giftRepository, ILogger<PurchasesService> logger)
         {
             _repo = repo;
+            _giftRepository = giftRepository;
             _logger = logger;
         }
 
@@ -36,6 +39,14 @@ namespace Chinese_sale_api.Services
         {
             if (dto.PurchDate > DateTime.Now)
                 throw new ArgumentException("Purchase date cannot be in the future.");
+
+            var gift = await _giftRepository.GetGiftByIdAsync(dto.GiftId);
+            if (gift != null && gift.WinnerId != null)
+            {
+                var winnerName = gift.Winner?.Name;
+                _logger.LogWarning("Attempted to add purchase for gift {GiftId} but it already has a winner: {Winner}.", dto.GiftId, winnerName);
+                throw new GiftAlreadyAsignedException(winnerName);
+            }
 
             var entity = new Purchase
             {
