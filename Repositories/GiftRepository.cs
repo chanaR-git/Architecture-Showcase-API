@@ -94,5 +94,24 @@ namespace Chinese_sale_api.Repositories
             return null;
         }
 
+        //get all gifts using pagination
+        public async Task<(IEnumerable<Gift> Items, int TotalCount)> GetGiftsPagedAsync(int pageNumber, int pageSize)
+        {
+            var query = _context.Gifts
+                .AsNoTracking()
+                .Include(g => g.Category)
+                .Include(g => g.Donor);
+
+            var totalCount = await query.CountAsync();
+
+            var items = await query
+                .OrderBy(g => g.Name) // חובה לבצע מיון לפני Skip
+                .Skip((pageNumber - 1) * pageSize)
+                .Take(pageSize)
+                .ToListAsync();
+
+            return (items, totalCount);
+        }
+
     }
 }

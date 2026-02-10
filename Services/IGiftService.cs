@@ -4,6 +4,7 @@ namespace Chinese_sale_api.Services
 {
     public interface IGiftService
     {
+        Task<PagedResult<ReadGiftDTO>> GetGiftsPagedAsync(PaginationParams @params);
         Task<ReadGiftDTO?> AddGiftAsync(CreateGiftDTO g);
         Task<ReadGiftDTO?> DeleteGiftAsync(string name);
         Task<IEnumerable<ReadGiftDTO>> getByNumBuyersAsync(int count);

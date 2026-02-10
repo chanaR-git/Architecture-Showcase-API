@@ -128,5 +128,16 @@ namespace Chinese_sale_api.Services
             var gifts = await _repository.getByNumBuyers(count);
             return gifts.Select(ToReadDto);
         }
+
+        public async Task<PagedResult<ReadGiftDTO>> GetGiftsPagedAsync(PaginationParams @params)
+        {
+            var (items, totalCount) = await _repository.GetGiftsPagedAsync(@params.PageNumber, @params.PageSize);
+
+            return new PagedResult<ReadGiftDTO>
+            {
+                Items = items.Select(ToReadDto),
+                TotalCount = totalCount
+            };
+        }
     }
 }

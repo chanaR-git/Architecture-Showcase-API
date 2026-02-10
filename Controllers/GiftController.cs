@@ -94,5 +94,16 @@ namespace Chinese_sale_api.Controllers
             var res = await _service.DeleteGiftAsync(name);
             return res is null ? NotFound() :  Ok(res);
         }
+
+        [HttpGet("paged")]
+        public async Task<IActionResult> GetGiftsPagedAsync([FromQuery] PaginationParams @params)
+        {
+            // וולידציה בסיסית
+            if (@params.PageNumber < 1 || @params.PageSize < 1)
+                return BadRequest("PageNumber and PageSize must be greater than 0");
+
+            var res = await _service.GetGiftsPagedAsync(@params);
+            return Ok(res);
+        }
     }
 }

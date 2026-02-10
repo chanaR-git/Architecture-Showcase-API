@@ -4,6 +4,7 @@ namespace Chinese_sale_api.Repositories
 {
     public interface IGiftRepository
     {
+        Task<(IEnumerable<Gift> Items, int TotalCount)> GetGiftsPagedAsync(int pageNumber, int pageSize);
         Task<Gift> AddGiftAsync(Gift Gift);
         Task<Gift?> UpdateGiftAsync(Gift gift);
         Task<Gift?> DeleteGiftAsync(string name);
