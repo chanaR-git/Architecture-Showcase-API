@@ -65,7 +65,16 @@ namespace Chinese_sale_api.Repositories
             return await _context.Gifts
                         .Include(g=>g.Category)
                         .Include(g=>g.Donor)
+                        .Include(g=>g.Winner)
                         .FirstOrDefaultAsync(d => d.Name == name);
+        }
+        public async Task<Gift?> GetGiftByIdAsync(int id)
+        {
+            return await _context.Gifts
+                        .Include(g=>g.Category)
+                        .Include(g=>g.Donor)
+                        .Include(g=>g.Winner)
+                        .FirstOrDefaultAsync(d => d.Id == id);
         }
         public async Task<IEnumerable<Gift>> GetGiftByDonorAsync(string name)
         {

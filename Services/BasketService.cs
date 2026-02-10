@@ -16,13 +16,15 @@ namespace Chinese_sale_api.Services
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger<BasketService> _logger;
         private readonly IPurchasesService _purchasesService;
+        private readonly IGiftRepository _giftRepository;
 
-        public BasketService(IBasketRepository basketRepository, IPurchasesService purchasesService, IHttpContextAccessor httpContextAccessor, ILogger<BasketService> logger)
+        public BasketService(IBasketRepository basketRepository, IPurchasesService purchasesService, IHttpContextAccessor httpContextAccessor, ILogger<BasketService> logger, IGiftRepository giftRepository)
         {
             _basketRepository = basketRepository;
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _purchasesService = purchasesService;
+            _giftRepository = giftRepository;
         }
 
         //map to dto
@@ -84,6 +86,19 @@ namespace Chinese_sale_api.Services
             return baskets.Select(Map);
         }
 
+        //Check if gift has a winner
+        private async Task<User?> GetGiftWinnerAsync(int giftId)
+        {
+            var gift = await _giftRepository.GetGiftByIdAsync(giftId);
+            if (gift == null)
+                return null;
+
+            if (gift.WinnerId != null)
+                return gift.Winner;
+
+            return null;
+        }
+
         //EnterToBasketAsync
         public async Task<ReadBasketDto?> EnterToBasketAsync(CreateBasketDto basketDto)
         {
@@ -92,6 +107,13 @@ namespace Chinese_sale_api.Services
 
             try
             {
+                var winner = await GetGiftWinnerAsync(basketDto.GiftId);
+                if (winner != null)
+                {
+                    _logger.LogWarning("User {UserId} attempted to add gift {GiftId} to basket, but this gift already has a winner: {WinnerName}.", userId, basketDto.GiftId, winner.Name);
+                    throw new InvalidOperationException($"This gift already has a winner: {winner.Name}");
+                }
+
                 var entity = new Basket
                 {
                     UserId = userId,
@@ -158,6 +180,17 @@ namespace Chinese_sale_api.Services
             {
                 _logger.LogWarning("No basket items found for user {userId} to purchase.", userId);
                 return false;
+            }
+
+            // Check if any gift in the basket has a winner
+            foreach (var basket in baskets)
+            {
+                var winner = await GetGiftWinnerAsync(basket.GiftId);
+                if (winner != null)
+                {
+                    _logger.LogWarning("User {UserId} attempted to purchase gift {GiftId}, but this gift already has a winner: {WinnerName}.", userId, basket.GiftId, winner.Name);
+                    throw new InvalidOperationException($"Cannot purchase gift '{basket.gift.Name}' - it already has a winner: {winner.Name}");
+                }
             }
 
             //transaction
