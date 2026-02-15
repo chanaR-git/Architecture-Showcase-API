@@ -220,5 +220,18 @@ namespace Chinese_sale_api.Services
             if (!allowedExtensions.Contains(fileExtension))
                 throw new ArgumentException("File extension not allowed. Allowed extensions: jpg, jpeg, png, webp");
         }
+
+        public async Task<FileStream?> GetGiftImageAsync(int giftId)
+        {
+            var gift = await _repository.GetGiftByIdAsync(giftId);
+            if (gift == null || string.IsNullOrEmpty(gift.ImagePath))
+                return null;
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), gift.ImagePath.Replace("/", "\\"));
+            if (!File.Exists(filePath))
+                return null;
+
+            return new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        }
     }
 }

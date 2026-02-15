@@ -15,5 +15,7 @@ namespace Chinese_sale_api.Services
         Task<string?> GetWinnerOfGift(string name);
         Task<ImageUploadResponseDTO> UploadGiftImageAsync(int giftId, IFormFile file);
         Task<FileStream?> DownloadGiftImageAsync(int giftId);
+        Task<FileStream?> GetGiftImageAsync(int giftId);
+
     }
 }

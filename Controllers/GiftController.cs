@@ -52,7 +52,7 @@ namespace Chinese_sale_api.Controllers
         public async Task<IActionResult> GetGiftWinnerAsync([FromRoute] string giftName)
         {
             var winner = await _service.GetWinnerOfGift(giftName);
-            return winner is null ? NotFound() : Ok(new {winner});
+            return winner is null ? NotFound() : Ok(new { winner });
         }
 
         [HttpPost]
@@ -99,7 +99,7 @@ namespace Chinese_sale_api.Controllers
         public async Task<IActionResult> DeleteGiftAsync([FromRoute] string name)
         {
             var res = await _service.DeleteGiftAsync(name);
-            return res is null ? NotFound() :  Ok(res);
+            return res is null ? NotFound() : Ok(res);
         }
 
         [HttpGet("paged")]
@@ -129,6 +129,15 @@ namespace Chinese_sale_api.Controllers
         public async Task<IActionResult> DownloadGiftImageAsync([FromRoute] int giftId)
         {
             var fileStream = await _service.DownloadGiftImageAsync(giftId);
+            return File(fileStream, "image/jpeg", "gift-image.jpg");
+        }
+
+        [HttpGet("{giftId}/image/public")]
+        public async Task<IActionResult> GetGiftImageAsync([FromRoute] int giftId)
+        {
+            var fileStream = await _service.GetGiftImageAsync(giftId);
+            if (fileStream == null)
+                return NotFound();
             return File(fileStream, "image/jpeg", "gift-image.jpg");
         }
     }
