@@ -112,5 +112,24 @@ namespace Chinese_sale_api.Controllers
             var res = await _service.GetGiftsPagedAsync(@params);
             return Ok(res);
         }
+
+        [HttpPost("{giftId}/image")]
+        [Authorize(Roles = "Admin")]
+        public async Task<IActionResult> UploadGiftImageAsync([FromRoute] int giftId, IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest("File is required.");
+
+            var result = await _service.UploadGiftImageAsync(giftId, file);
+            return Ok(result);
+        }
+
+        [HttpGet("{giftId}/image")]
+        [Authorize]
+        public async Task<IActionResult> DownloadGiftImageAsync([FromRoute] int giftId)
+        {
+            var fileStream = await _service.DownloadGiftImageAsync(giftId);
+            return File(fileStream, "image/jpeg", "gift-image.jpg");
+        }
     }
 }

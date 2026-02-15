@@ -4,6 +4,7 @@ using Chinese_sale_api.Middlewares;
 using Chinese_sale_api.Repositories;
 using Chinese_sale_api.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
@@ -126,9 +127,11 @@ builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
 
 var app = builder.Build();
 
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseMiddleware<RequestLog>();
 app.UseMiddleware<GiftAlreadyAsignedMiddleware>();
 app.UseCors("allowlocalhost");
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
@@ -137,10 +140,20 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// Configure static files for Assets folder
+var assetsPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets");
+if (!Directory.Exists(assetsPath))
+{
+    Directory.CreateDirectory(assetsPath);
+}
 
-app.UseAuthentication(); 
-app.UseAuthorization();
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(assetsPath),
+    RequestPath = "/assets"
+});
+
+app.UseStaticFiles();
 
 app.MapControllers();
 

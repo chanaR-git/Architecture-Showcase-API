@@ -13,5 +13,7 @@ namespace Chinese_sale_api.Services
         Task<IEnumerable<ReadGiftDTO>> GetGiftsAsync();
         Task<ReadGiftDTO?> UpdateGiftAsync(string name, UpdateGiftDTO updatedGift);
         Task<string?> GetWinnerOfGift(string name);
+        Task<ImageUploadResponseDTO> UploadGiftImageAsync(int giftId, IFormFile file);
+        Task<FileStream?> DownloadGiftImageAsync(int giftId);
     }
 }

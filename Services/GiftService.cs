@@ -145,5 +145,80 @@ namespace Chinese_sale_api.Services
             var winner = await _repository.GetWinnerOfGift(name);
             return winner?.Name;
         }
+
+        public async Task<ImageUploadResponseDTO> UploadGiftImageAsync(int giftId, IFormFile file)
+        {
+            var gift = await _repository.GetGiftByIdAsync(giftId);
+            if (gift == null)
+                throw new KeyNotFoundException($"Gift with id {giftId} not found.");
+
+            ValidateImageFile(file);
+
+            var assetsPath = Path.Combine(Directory.GetCurrentDirectory(), "Assets", "images");
+            if (!Directory.Exists(assetsPath))
+            {
+                Directory.CreateDirectory(assetsPath);
+            }
+
+            var fileExtension = Path.GetExtension(file.FileName).TrimStart('.').ToLower();
+            var fileName = $"gift-{giftId}-{DateTime.Now.Ticks}.{fileExtension}";
+            var filePath = Path.Combine(assetsPath, fileName);
+
+            if (!string.IsNullOrEmpty(gift.ImagePath))
+            {
+                var oldFilePath = Path.Combine(Directory.GetCurrentDirectory(), gift.ImagePath.Replace("/", "\\"));
+                if (File.Exists(oldFilePath))
+                {
+                    File.Delete(oldFilePath);
+                }
+            }
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            gift.ImagePath = $"Assets/images/{fileName}";
+            await _repository.UpdateGiftAsync(gift);
+
+            return new ImageUploadResponseDTO
+            {
+                Success = true,
+                Message = "Image uploaded successfully.",
+                ImagePath = gift.ImagePath
+            };
+        }
+
+        public async Task<FileStream?> DownloadGiftImageAsync(int giftId)
+        {
+            var gift = await _repository.GetGiftByIdAsync(giftId);
+            if (gift == null)
+                throw new KeyNotFoundException($"Gift with id {giftId} not found.");
+
+            if (string.IsNullOrEmpty(gift.ImagePath))
+                throw new KeyNotFoundException("Gift image path is not set.");
+
+            var filePath = Path.Combine(Directory.GetCurrentDirectory(), gift.ImagePath.Replace("/", "\\"));
+            if (!File.Exists(filePath))
+                throw new KeyNotFoundException("Gift image file not found on disk.");
+
+            var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read);
+            return fileStream;
+        }
+
+        private void ValidateImageFile(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new ArgumentException("File is empty.");
+
+            const long maxFileSize = 5 * 1024 * 1024; // 5MB
+            if (file.Length > maxFileSize)
+                throw new ArgumentException("File size exceeds 5MB limit.");
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp" };
+            var fileExtension = Path.GetExtension(file.FileName).ToLower();
+            if (!allowedExtensions.Contains(fileExtension))
+                throw new ArgumentException("File extension not allowed. Allowed extensions: jpg, jpeg, png, webp");
+        }
     }
 }
