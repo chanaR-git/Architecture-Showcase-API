@@ -12,5 +12,6 @@ namespace Chinese_sale_api.Services
         Task<ReadGiftDTO?> GetGiftByNameAsync(string name);
         Task<IEnumerable<ReadGiftDTO>> GetGiftsAsync();
         Task<ReadGiftDTO?> UpdateGiftAsync(string name, UpdateGiftDTO updatedGift);
+        Task<string?> GetWinnerOfGift(string name);
     }
 }

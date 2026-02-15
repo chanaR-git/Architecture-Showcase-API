@@ -16,7 +16,7 @@ namespace Chinese_sale_api.Repositories
         }
         public async Task<IEnumerable<Gift>> GetGiftsAsync()
         {
-            return await _context.Gifts.AsNoTracking().Include(g=> g.Category).Include(g => g.Donor).ToListAsync();
+            return await _context.Gifts.AsNoTracking().Include(g => g.Category).Include(g => g.Donor).ToListAsync();
         }
         public async Task<Gift> AddGiftAsync(Gift gift)
         {
@@ -29,7 +29,7 @@ namespace Chinese_sale_api.Repositories
             await _context.SaveChangesAsync();
             return gift;
         }
-        
+
         //update gift winner
         public async Task<User?> UpdateGiftWinnerAsync(string name, int winnerId)
         {
@@ -38,7 +38,7 @@ namespace Chinese_sale_api.Repositories
             {
                 return null;
             }
-            
+
             if (gift.WinnerId != null)
             {
                 throw new InvalidOperationException("It's immposible to do duplicate lotteries in one sale :(");
@@ -63,23 +63,23 @@ namespace Chinese_sale_api.Repositories
         public async Task<Gift?> GetGiftByNameAsync(string name)
         {
             return await _context.Gifts
-                        .Include(g=>g.Category)
-                        .Include(g=>g.Donor)
-                        .Include(g=>g.Winner)
+                        .Include(g => g.Category)
+                        .Include(g => g.Donor)
+                        .Include(g => g.Winner)
                         .FirstOrDefaultAsync(d => d.Name == name);
         }
         public async Task<Gift?> GetGiftByIdAsync(int id)
         {
             return await _context.Gifts
-                        .Include(g=>g.Category)
-                        .Include(g=>g.Donor)
-                        .Include(g=>g.Winner)
+                        .Include(g => g.Category)
+                        .Include(g => g.Donor)
+                        .Include(g => g.Winner)
                         .FirstOrDefaultAsync(d => d.Id == id);
         }
         public async Task<IEnumerable<Gift>> GetGiftByDonorAsync(string name)
         {
             return await _context.Gifts
-                           .Include(g=>g.Donor)
+                           .Include(g => g.Donor)
                            .Where(g => g.Donor.Name == name)
                            .ToListAsync();
         }
@@ -87,7 +87,7 @@ namespace Chinese_sale_api.Repositories
         {
             return await _context.Gifts
                         .Include(g => g.Purchases)
-                        .Where(g => g.Purchases !=null && g.Purchases.Count == count)
+                        .Where(g => g.Purchases != null && g.Purchases.Count == count)
                         .ToListAsync();
         }
 
@@ -122,5 +122,13 @@ namespace Chinese_sale_api.Repositories
             return (items, totalCount);
         }
 
+        public async Task<User?> GetWinnerOfGift(string giftName)
+        {
+            var gift = await _context.Gifts
+                        .Include(g => g.Winner)
+                        .FirstOrDefaultAsync(g => g.Name == giftName);
+            return gift?.Winner;
+
+        }
     }
 }

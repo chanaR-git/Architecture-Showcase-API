@@ -48,6 +48,13 @@ namespace Chinese_sale_api.Controllers
             return Ok(res);
         }
 
+        [HttpGet("{giftName}/mywinner")]
+        public async Task<IActionResult> GetGiftWinnerAsync([FromRoute] string giftName)
+        {
+            var res = await _service.GetWinnerOfGift(giftName);
+            return res is null ? NotFound() : Ok(res);
+        }
+
         [HttpPost]
         [Authorize(Roles = "Admin")]
         public async Task<IActionResult> AddGiftAsync([FromBody] CreateGiftDTO g)

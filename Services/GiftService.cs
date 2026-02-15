@@ -12,7 +12,7 @@ namespace Chinese_sale_api.Services
         private readonly IGiftRepository _repository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IDonorRepository _donorRepository;
-        public GiftService(IGiftRepository repo, IDonorRepository donorRepository,ICategoryRepository categoryRepository)
+        public GiftService(IGiftRepository repo, IDonorRepository donorRepository, ICategoryRepository categoryRepository)
         {
             _repository = repo;
             _donorRepository = donorRepository;
@@ -22,7 +22,7 @@ namespace Chinese_sale_api.Services
         private static ReadGiftDTO ToReadDto(Gift g) =>
             new ReadGiftDTO
             {
-                Id=g.Id,
+                Id = g.Id,
                 Name = g.Name,
                 Description = g.Description,
                 Price = g.Price,
@@ -44,15 +44,15 @@ namespace Chinese_sale_api.Services
             var donor = await _donorRepository.GetDonorByIdAsync((int)g.DonorId);
             if (donor == null)
                 throw new ArgumentException("Donor does not exist.");
-            
+
             var category = await _categoryRepository.GetCategoryById((int)g.CategoryId);
             if (category == null)
                 throw new ArgumentException("Category does not exist.");
-            
+
             var nameConflict = await _repository.GetGiftByNameAsync(g.Name);
-            if (nameConflict != null )
+            if (nameConflict != null)
                 throw new InvalidOperationException("Gift name already exists.");
-            
+
             Gift newGift = new()
             {
                 Name = g.Name,
@@ -65,8 +65,8 @@ namespace Chinese_sale_api.Services
                 Donor = donor,
                 Purchases = new()
             };
-                var created = await _repository.AddGiftAsync(newGift);
-                return ToReadDto(created);
+            var created = await _repository.AddGiftAsync(newGift);
+            return ToReadDto(created);
 
         }
 
@@ -98,7 +98,7 @@ namespace Chinese_sale_api.Services
             existing.Category = category ?? existing.Category;
             //existing.Donor = donor ?? existing.Donor;
             //existing.DonorId = updatedGift.DonorId ?? existing.DonorId;
-           
+
 
             var updated = await _repository.UpdateGiftAsync(existing);
             return updated is null ? null : ToReadDto(updated);
@@ -122,7 +122,7 @@ namespace Chinese_sale_api.Services
             return gifts.Select(ToReadDto);
         }
 
-     
+
         public async Task<IEnumerable<ReadGiftDTO>> getByNumBuyersAsync(int count)
         {
             var gifts = await _repository.getByNumBuyers(count);
@@ -138,6 +138,12 @@ namespace Chinese_sale_api.Services
                 Items = items.Select(ToReadDto),
                 TotalCount = totalCount
             };
+        }
+
+        public async Task<string?> GetWinnerOfGift(string name)
+        {
+            var winner = await _repository.GetWinnerOfGift(name);
+            return winner?.Name;
         }
     }
 }
