@@ -48,11 +48,11 @@ namespace Chinese_sale_api.Controllers
             return Ok(res);
         }
 
-        [HttpGet("{giftName}/mywinner")]
+        [HttpGet("{giftName}/winner")]
         public async Task<IActionResult> GetGiftWinnerAsync([FromRoute] string giftName)
         {
-            var res = await _service.GetWinnerOfGift(giftName);
-            return res is null ? NotFound() : Ok(res);
+            var winner = await _service.GetWinnerOfGift(giftName);
+            return winner is null ? NotFound() : Ok(new {winner});
         }
 
         [HttpPost]
