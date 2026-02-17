@@ -1,9 +1,10 @@
 ﻿using System.Diagnostics;
-using System.Diagnostics;
 
 namespace Chinese_sale_api.Middlewares
 {
-
+    /// <summary>
+    /// Middleware that logs all HTTP requests and their response times
+    /// </summary>
     public class RequestLog
     {
         private readonly RequestDelegate _next;
@@ -21,7 +22,7 @@ namespace Chinese_sale_api.Middlewares
             var requestPath = context.Request.Path;
             var requestMethod = context.Request.Method;
 
-            _logger.LogInformation("Incoming Request: {Method} {Path}", requestMethod, requestPath);
+            _logger.LogInformation("[HTTP] {Method} {Path} - Request started", requestMethod, requestPath);
 
             try
             {
@@ -32,18 +33,17 @@ namespace Chinese_sale_api.Middlewares
                 var elapsed = stopwatch.ElapsedMilliseconds;
 
                 _logger.LogInformation(
-                    "Completed {Method} {Path} responded {StatusCode} in {Duration}ms",
+                    "[HTTP] {Method} {Path} - Response {StatusCode} in {Duration}ms",
                     requestMethod, requestPath, statusCode, elapsed);
             }
             catch (Exception ex)
             {
                 stopwatch.Stop();
                 _logger.LogError(ex,
-                    "Failed {Method} {Path} after {Duration}ms",
+                    "[HTTP] {Method} {Path} - Failed after {Duration}ms",
                     requestMethod, requestPath, stopwatch.ElapsedMilliseconds);
                 throw;
             }
         }
-   
-}
+    }
 }

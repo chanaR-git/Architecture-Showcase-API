@@ -2,6 +2,7 @@
 using Chinese_sale_api.DTO;
 using Chinese_sale_api.DTOs;
 using Chinese_sale_api.Models;
+using Chinese_sale_api.Utilities;
 using Microsoft.OpenApi.Extensions;
 using Chinese_sale_api.Exceptions;
 
@@ -20,6 +21,7 @@ namespace Chinese_sale_api.Services
         private readonly ILogger<BasketService> _logger;
         private readonly IPurchasesService _purchasesService;
         private readonly IGiftRepository _giftRepository;
+        private const string ClassName = nameof(BasketService);
 
         public BasketService(IBasketRepository basketRepository, IPurchasesService purchasesService, IHttpContextAccessor httpContextAccessor, ILogger<BasketService> logger, IGiftRepository giftRepository)
         {
@@ -81,10 +83,10 @@ namespace Chinese_sale_api.Services
         public async Task<IEnumerable<ReadBasketDto>> GetMyBasket()
         {
             int userId = GetCurrentUserId();
-            _logger.LogInformation("Fetching basket for user {UserId}.", userId);
+            LoggingHelper.LogMethodStart(_logger, nameof(GetMyBasket), ClassName, new { UserId = userId });
 
             var baskets = await _basketRepository.GetMyBasketAsync(userId);
-            _logger.LogInformation("Retrieved {Count} basket items for user {UserId}.", baskets.Count(), userId);
+            LoggingHelper.LogMethodWithCount(_logger, nameof(GetMyBasket), ClassName, baskets.Count());
 
             return baskets.Select(Map);
         }
@@ -106,14 +108,14 @@ namespace Chinese_sale_api.Services
         public async Task<ReadBasketDto?> EnterToBasketAsync(CreateBasketDto basketDto)
         {
             int userId = GetCurrentUserId();
-            _logger.LogInformation("User {UserId} is adding gift {GiftId} amount {Amount} to basket.", userId, basketDto.GiftId, basketDto.amount);
+            LoggingHelper.LogMethodStart(_logger, nameof(EnterToBasketAsync), ClassName, new { UserId = userId, GiftId = basketDto.GiftId, Amount = basketDto.amount });
 
             try
             {
                 var winner = await GetGiftWinnerAsync(basketDto.GiftId);
                 if (winner != null)
                 {
-                    _logger.LogWarning("User {UserId} attempted to add gift {GiftId} to basket, but this gift already has a winner: {WinnerName}.", userId, basketDto.GiftId, winner.Name);
+                    LoggingHelper.LogDuplicateAttempt(_logger, nameof(EnterToBasketAsync), ClassName, $"GiftId: {basketDto.GiftId}");
                     throw new GiftAlreadyAsignedException(winner.Name);
                 }
 
@@ -122,15 +124,14 @@ namespace Chinese_sale_api.Services
                     UserId = userId,
                     GiftId = basketDto.GiftId,
                     amount = basketDto.amount,
-
                 };
                 var basket = await _basketRepository.EnterToBasketAsync(entity);
-                _logger.LogInformation("Gift {GiftId} added to basket for user {UserId} with basket id {BasketId}.", basket.GiftId, userId, basket.Id);
+                LoggingHelper.LogCreated(_logger, nameof(EnterToBasketAsync), ClassName, new { basket.Id, UserId = userId, basket.GiftId });
                 return new ReadBasketDto { Id = basket.Id, amount = basket.amount, GiftId = basket.GiftId, UserId = userId };
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error occurred while adding gift {GiftId} to basket for user {UserId}.", basketDto.GiftId, userId);
+                LoggingHelper.LogUnexpectedError(_logger, nameof(EnterToBasketAsync), ClassName, ex);
                 throw new Exception(ex.Message);
             }
         }
@@ -138,63 +139,64 @@ namespace Chinese_sale_api.Services
         //update amount
         public async Task<ReadBasketDto?> UpdateBasketAmountAsync(int id, int newAmount)
         {
+            LoggingHelper.LogMethodStart(_logger, nameof(UpdateBasketAmountAsync), ClassName, new { BasketId = id, NewAmount = newAmount });
 
             if (newAmount < 0 || newAmount > 1000)
             {
-                _logger.LogWarning("Attempted to update basket {BasketId} with invalid amount {NewAmount}.", id, newAmount);
+                LoggingHelper.LogValidationError(_logger, nameof(UpdateBasketAmountAsync), ClassName, $"Invalid amount {newAmount}. Must be between 0 and 1000.");
                 throw new ArgumentOutOfRangeException();
             }
             var basket = await _basketRepository.UpdateBasketAmountAsync(id, newAmount);
             if (basket == null)
             {
-                _logger.LogWarning("Basket {BasketId} not found for update.", id);
+                LoggingHelper.LogNotFound(_logger, nameof(UpdateBasketAmountAsync), ClassName, id.ToString());
                 return null;
             }
 
-            _logger.LogInformation("Basket {BasketId} updated to new amount {NewAmount}.", id, newAmount);
+            LoggingHelper.LogUpdated(_logger, nameof(UpdateBasketAmountAsync), ClassName, new { BasketId = id, NewAmount = newAmount });
             return Map(basket);
         }
 
         //delete basket
         public async Task<int?> DeleteBasketAsync(int id)
         {
-            _logger.LogInformation("Attempting to delete basket {BasketId}.", id);
+            LoggingHelper.LogMethodStart(_logger, nameof(DeleteBasketAsync), ClassName, new { BasketId = id });
             var basket = await _basketRepository.DeleteBasketAsync(id);
 
             if (basket == null)
             {
-                _logger.LogWarning("Basket {BasketId} not found for deletion.", id);
+                LoggingHelper.LogNotFound(_logger, nameof(DeleteBasketAsync), ClassName, id.ToString());
                 return null;
             }
 
-            _logger.LogInformation("Basket {BasketId} deleted successfully.", id);
+            LoggingHelper.LogDeleted(_logger, nameof(DeleteBasketAsync), ClassName, id.ToString());
             return basket.Id;
         }
 
         public async Task<bool> BuyAllBasketsAsync()
         {
             int userId = GetCurrentUserId();
-            _logger.LogInformation("Fetching basket for user {userId}.", userId);
+            LoggingHelper.LogMethodStart(_logger, nameof(BuyAllBasketsAsync), ClassName, new { UserId = userId });
 
             var baskets = await _basketRepository.GetMyBasketAsync(userId);
-            _logger.LogInformation("Retrieved {Count} basket items for user {userId}.", baskets.Count(), userId);
+            LoggingHelper.LogMethodWithCount(_logger, $"{nameof(BuyAllBasketsAsync)}_FetchBaskets", ClassName, baskets.Count());
 
             if (!baskets.Any())
             {
-                _logger.LogWarning("No basket items found for user {userId} to purchase.", userId);
+                LoggingHelper.LogValidationError(_logger, nameof(BuyAllBasketsAsync), ClassName, $"No basket items for user {userId}");
                 return false;
             }
 
             // Check if any gift in the basket has a winner
-                foreach (var basket in baskets)
+            foreach (var basket in baskets)
+            {
+                var winner = await GetGiftWinnerAsync(basket.GiftId);
+                if (winner != null)
                 {
-                    var winner = await GetGiftWinnerAsync(basket.GiftId);
-                    if (winner != null)
-                    {
-                        _logger.LogWarning("User {UserId} attempted to purchase gift {GiftId}, but this gift already has a winner: {WinnerName}.", userId, basket.GiftId, winner.Name);
-                        throw new GiftAlreadyAsignedException(winner.Name);
-                    }
+                    LoggingHelper.LogDuplicateAttempt(_logger, nameof(BuyAllBasketsAsync), ClassName, $"GiftId: {basket.GiftId}");
+                    throw new GiftAlreadyAsignedException(winner.Name);
                 }
+            }
 
             //transaction
             using var transaction = await _basketRepository.beginTransactionAsync();
@@ -217,15 +219,16 @@ namespace Chinese_sale_api.Services
                     }
                 }
                 await transaction.CommitAsync();
-                _logger.LogInformation("All basket items purchased successfully for user {userId}.", userId);
+                LoggingHelper.LogMethodSuccess(_logger, nameof(BuyAllBasketsAsync), ClassName, new { UserId = userId, PurchaseCount = baskets.Sum(b => b.amount) });
                 return true;
 
-            } catch(Exception ex){
+            } 
+            catch(Exception ex)
+            {
                 await transaction.RollbackAsync();
-                _logger.LogError(ex, "purchase failed for user {userid} transaction rolled back",userId);
+                LoggingHelper.LogUnexpectedError(_logger, nameof(BuyAllBasketsAsync), ClassName, ex);
                 return false;
             }
-
         }
     }
 }
