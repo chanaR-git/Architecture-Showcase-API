@@ -4,6 +4,7 @@ using Chinese_sale_api.Repositories;
 using Chinese_sale_api.Utilities;
 using projectApiAngular.Repositories;
 using System.Data;
+using System.Text.Json;
 
 
 namespace Chinese_sale_api.Services
@@ -13,14 +14,29 @@ namespace Chinese_sale_api.Services
         private readonly IGiftRepository _repository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IDonorRepository _donorRepository;
+        private readonly IRedisCacheService _cacheService;
         private readonly ILogger<GiftService> _logger;
         private const string ClassName = nameof(GiftService);
 
-        public GiftService(IGiftRepository repo, IDonorRepository donorRepository, ICategoryRepository categoryRepository, ILogger<GiftService> logger)
+        // Cache key prefixes
+        private const string CACHE_KEY_GIFT_PREFIX = "gift:";
+        private const string CACHE_KEY_ALL_GIFTS = "gift:all";
+        private const string CACHE_KEY_GIFTS_PAGED = "gift:paged";
+        private const string CACHE_KEY_GIFT_BY_DONOR_PREFIX = "gift:donor:";
+        private const string CACHE_KEY_GIFT_BY_BUYERS_PREFIX = "gift:buyers:";
+        private const string CACHE_KEY_GIFT_WINNER_PREFIX = "gift:winner:";
+
+        public GiftService(
+            IGiftRepository repo, 
+            IDonorRepository donorRepository, 
+            ICategoryRepository categoryRepository, 
+            IRedisCacheService cacheService,
+            ILogger<GiftService> logger)
         {
             _repository = repo;
             _donorRepository = donorRepository;
             _categoryRepository = categoryRepository;
+            _cacheService = cacheService;
             _logger = logger;
         }
 
@@ -41,9 +57,24 @@ namespace Chinese_sale_api.Services
         public async Task<IEnumerable<ReadGiftDTO>> GetGiftsAsync()
         {
             LoggingHelper.LogMethodStart(_logger, nameof(GetGiftsAsync), ClassName);
+
+            // Cache-Aside: Check cache first
+            var cached = await _cacheService.GetAsync<List<ReadGiftDTO>>(CACHE_KEY_ALL_GIFTS);
+            if (cached != null)
+            {
+                _logger.LogInformation("Returning gifts from cache");
+                return cached;
+            }
+
+            // Cache miss: Fetch from database
             var gifts = await _repository.GetGiftsAsync();
-            LoggingHelper.LogMethodWithCount(_logger, nameof(GetGiftsAsync), ClassName, gifts.Count());
-            return gifts.Select(ToReadDto);
+            var result = gifts.Select(ToReadDto).ToList();
+
+            // Store in cache
+            await _cacheService.SetAsync(CACHE_KEY_ALL_GIFTS, result);
+
+            LoggingHelper.LogMethodWithCount(_logger, nameof(GetGiftsAsync), ClassName, result.Count);
+            return result;
         }
 
         public async Task<ReadGiftDTO?> AddGiftAsync(CreateGiftDTO g)
@@ -85,6 +116,10 @@ namespace Chinese_sale_api.Services
             };
             var created = await _repository.AddGiftAsync(newGift);
             LoggingHelper.LogCreated(_logger, nameof(AddGiftAsync), ClassName, new { created.Id, created.Name });
+
+            // Invalidate cache after creating a new gift
+            await InvalidateGiftCacheAsync();
+
             return ToReadDto(created);
         }
 
@@ -129,6 +164,10 @@ namespace Chinese_sale_api.Services
 
             var updated = await _repository.UpdateGiftAsync(existing);
             LoggingHelper.LogUpdated(_logger, nameof(UpdateGiftAsync), ClassName, new { updated.Id, updated.Name });
+
+            // Invalidate cache after updating a gift
+            await InvalidateGiftCacheAsync(name);
+
             return updated is null ? null : ToReadDto(updated);
         }
 
@@ -139,40 +178,104 @@ namespace Chinese_sale_api.Services
             if (gift is null)
                 LoggingHelper.LogNotFound(_logger, nameof(DeleteGiftAsync), ClassName, name);
             else
+            {
                 LoggingHelper.LogDeleted(_logger, nameof(DeleteGiftAsync), ClassName, name);
+                
+                // Invalidate cache after deleting a gift
+                await InvalidateGiftCacheAsync(name);
+            }
             return gift is null ? null : ToReadDto(gift);
         }
 
         public async Task<ReadGiftDTO?> GetGiftByNameAsync(string name)
         {
             LoggingHelper.LogMethodStart(_logger, nameof(GetGiftByNameAsync), ClassName, new { GiftName = name });
+
+            // Cache-Aside: Check cache first
+            var cacheKey = $"{CACHE_KEY_GIFT_PREFIX}{name}";
+            var cached = await _cacheService.GetAsync<ReadGiftDTO>(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("Returning gift {GiftName} from cache", name);
+                return cached;
+            }
+
+            // Cache miss: Fetch from database
             var gift = await _repository.GetGiftByNameAsync(name);
             if (gift is null)
                 LoggingHelper.LogNotFound(_logger, nameof(GetGiftByNameAsync), ClassName, name);
             else
+            {
                 LoggingHelper.LogMethodSuccess(_logger, nameof(GetGiftByNameAsync), ClassName);
+                // Store in cache
+                await _cacheService.SetAsync(cacheKey, ToReadDto(gift));
+            }
             return gift is null ? null : ToReadDto(gift);
         }
 
         public async Task<IEnumerable<ReadGiftDTO>?> GetGiftByDonorAsync(string name)
         {
             LoggingHelper.LogMethodStart(_logger, nameof(GetGiftByDonorAsync), ClassName, new { DonorName = name });
+
+            // Cache-Aside: Check cache first
+            var cacheKey = $"{CACHE_KEY_GIFT_BY_DONOR_PREFIX}{name}";
+            var cached = await _cacheService.GetAsync<List<ReadGiftDTO>>(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("Returning gifts by donor {DonorName} from cache", name);
+                return cached;
+            }
+
+            // Cache miss: Fetch from database
             var gifts = await _repository.GetGiftByDonorAsync(name);
-            LoggingHelper.LogMethodWithCount(_logger, nameof(GetGiftByDonorAsync), ClassName, gifts.Count());
-            return gifts.Select(ToReadDto);
+            var result = gifts.Select(ToReadDto).ToList();
+
+            // Store in cache
+            await _cacheService.SetAsync(cacheKey, result);
+
+            LoggingHelper.LogMethodWithCount(_logger, nameof(GetGiftByDonorAsync), ClassName, result.Count);
+            return result;
         }
 
         public async Task<IEnumerable<ReadGiftDTO>> getByNumBuyersAsync(int count)
         {
             LoggingHelper.LogMethodStart(_logger, nameof(getByNumBuyersAsync), ClassName, new { BuyerCount = count });
+
+            // Cache-Aside: Check cache first
+            var cacheKey = $"{CACHE_KEY_GIFT_BY_BUYERS_PREFIX}{count}";
+            var cached = await _cacheService.GetAsync<List<ReadGiftDTO>>(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("Returning gifts by {BuyerCount} buyers from cache", count);
+                return cached;
+            }
+
+            // Cache miss: Fetch from database
             var gifts = await _repository.getByNumBuyers(count);
-            LoggingHelper.LogMethodWithCount(_logger, nameof(getByNumBuyersAsync), ClassName, gifts.Count());
-            return gifts.Select(ToReadDto);
+            var result = gifts.Select(ToReadDto).ToList();
+
+            // Store in cache
+            await _cacheService.SetAsync(cacheKey, result);
+
+            LoggingHelper.LogMethodWithCount(_logger, nameof(getByNumBuyersAsync), ClassName, result.Count);
+            return result;
         }
 
         public async Task<PagedResult<ReadGiftDTO>> GetGiftsPagedAsync(PaginationParams @params)
         {
             LoggingHelper.LogMethodStart(_logger, nameof(GetGiftsPagedAsync), ClassName, @params);
+
+            // Cache-Aside: Check cache first (using page params as part of key)
+            var cacheKey = $"{CACHE_KEY_GIFTS_PAGED}:{@params.PageNumber}:{@params.PageSize}";
+            var cached = await _cacheService.GetAsync<PagedResult<ReadGiftDTO>>(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("Returning paged gifts from cache for page {Page}, size {Size}", 
+                    @params.PageNumber, @params.PageSize);
+                return cached;
+            }
+
+            // Cache miss: Fetch from database
             var (items, totalCount) = await _repository.GetGiftsPagedAsync(@params.PageNumber, @params.PageSize);
 
             var result = new PagedResult<ReadGiftDTO>
@@ -180,6 +283,10 @@ namespace Chinese_sale_api.Services
                 Items = items.Select(ToReadDto),
                 TotalCount = totalCount
             };
+
+            // Store in cache
+            await _cacheService.SetAsync(cacheKey, result);
+
             LoggingHelper.LogMethodSuccess(_logger, nameof(GetGiftsPagedAsync), ClassName, new { ItemsCount = items.Count(), TotalCount = totalCount });
             return result;
         }
@@ -187,11 +294,26 @@ namespace Chinese_sale_api.Services
         public async Task<string?> GetWinnerOfGift(string name)
         {
             LoggingHelper.LogMethodStart(_logger, nameof(GetWinnerOfGift), ClassName, new { GiftName = name });
+
+            // Cache-Aside: Check cache first
+            var cacheKey = $"{CACHE_KEY_GIFT_WINNER_PREFIX}{name}";
+            var cached = await _cacheService.GetAsync<string>(cacheKey);
+            if (cached != null)
+            {
+                _logger.LogInformation("Returning winner of gift {GiftName} from cache", name);
+                return cached;
+            }
+
+            // Cache miss: Fetch from database
             var winner = await _repository.GetWinnerOfGift(name);
             if (winner == null)
                 LoggingHelper.LogNotFound(_logger, nameof(GetWinnerOfGift), ClassName, name);
             else
+            {
                 LoggingHelper.LogMethodSuccess(_logger, nameof(GetWinnerOfGift), ClassName, new { WinnerName = winner.Name });
+                // Store in cache
+                await _cacheService.SetAsync(cacheKey, winner.Name);
+            }
             return winner?.Name;
         }
 
@@ -321,6 +443,35 @@ namespace Chinese_sale_api.Services
 
             LoggingHelper.LogMethodSuccess(_logger, nameof(GetGiftImageAsync), ClassName);
             return new FileStream(filePath, FileMode.Open, FileAccess.Read);
+        }
+
+        /// <summary>
+        /// Invalidates gift-related cache entries.
+        /// </summary>
+        private async Task InvalidateGiftCacheAsync(string? giftName = null)
+        {
+            try
+            {
+                // Always invalidate the all-gifts cache
+                await _cacheService.RemoveAsync(CACHE_KEY_ALL_GIFTS);
+                _logger.LogDebug("Invalidated all gifts cache");
+
+                // Invalidate paged cache (simplified - clears all paged caches)
+                // In production, you might want to use Redis SCAN to find matching keys
+                await _cacheService.RemoveAsync($"{CACHE_KEY_GIFTS_PAGED}:*");
+
+                // If a specific gift was modified/deleted, invalidate its individual cache
+                if (!string.IsNullOrEmpty(giftName))
+                {
+                    await _cacheService.RemoveAsync($"{CACHE_KEY_GIFT_PREFIX}{giftName}");
+                    _logger.LogDebug("Invalidated cache for gift: {GiftName}", giftName);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log but don't throw - cache invalidation failure shouldn't break the operation
+                _logger.LogWarning(ex, "Failed to invalidate cache for gift: {GiftName}", giftName ?? "all");
+            }
         }
     }
 }

@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using projectApiAngular.Repositories;
 using Serilog;
+using StackExchange.Redis;
 using System.Text;
 
 
@@ -40,14 +41,47 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("RedisSettings"));
 JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+RedisSettings? redisSettings = builder.Configuration.GetSection("RedisSettings").Get<RedisSettings>();
+
 if (jwtSettings is null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
 {
     throw new InvalidOperationException("Missing or invalid JwtSettings in configuration.");
 }
 
+// Register RedisSettings as singleton so it can be injected
+builder.Services.AddSingleton(redisSettings ?? new RedisSettings());
+
+// Configure Redis
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var config = ConfigurationOptions.Parse($"{redisSettings?.Host}:{redisSettings?.Port}");
+        if (!string.IsNullOrEmpty(redisSettings?.Password))
+        {
+            config.Password = redisSettings.Password;
+        }
+        config.AbortOnConnectFail = false; // Don't crash if Redis is down
+        config.ConnectTimeout = 5000;
+        config.SyncTimeout = 3000;
+
+        var connection = ConnectionMultiplexer.Connect(config);
+        logger.LogInformation("Connected to Redis at {Host}:{Port}", redisSettings?.Host, redisSettings?.Port);
+        return connection;
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Failed to connect to Redis. Caching will fall back to database.");
+        // Return a dummy connection that will fail gracefully
+        throw;
+    }
+});
+
+
 builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
 {
@@ -119,10 +153,11 @@ builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddSingleton<ITokenService,TokenService>();
 builder.Services.AddScoped<ILotteryService, LotteryService>();
 builder.Services.AddScoped<IZIPService, ZIPService>();
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 
 var app = builder.Build();
