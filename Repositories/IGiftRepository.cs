@@ -1,0 +1,21 @@
+﻿using Chinese_sale_api.Models;
+
+namespace Chinese_sale_api.Repositories
+{
+    public interface IGiftRepository
+    {
+        Task<(IEnumerable<Gift> Items, int TotalCount)> GetGiftsPagedAsync(int pageNumber, int pageSize);
+        Task<Gift> AddGiftAsync(Gift Gift);
+        Task<Gift?> UpdateGiftAsync(Gift gift);
+        Task<Gift?> DeleteGiftAsync(string name);
+        Task<IEnumerable<Gift>> getByNumBuyers(int count);
+        Task<IEnumerable<Gift>> GetGiftByDonorAsync(string name);
+        Task<Gift?> GetGiftByNameAsync(string name);
+        Task<Gift?> GetGiftByIdAsync(int id);
+        Task<IEnumerable<Gift>> GetGiftsAsync();
+        Task<User?> UpdateGiftWinnerAsync(string name, int winnerId);
+        Task<int?> StartNewChineseSaleAsync();
+        Task<User?> GetWinnerOfGift(string giftName);
+
+    }
+}
