@@ -10,26 +10,33 @@ services:
       - "5001:5001"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:5000;https://+:5001
+      - ASPNETCORE_URLS=http://+:5000
       - ConnectionStrings__DefaultConnection=Server=host.docker.internal;DataBase=Chinece_Sale_DB;Integrated Security=SSPI;Persist Security Info=False;TrustServerCertificate=True;
       - ConnectionStrings__SeminaryConnection=Server=host.docker.internal;DataBase=Chinese_Sale_32922;Integrated Security=SSPI;Persist Security Info=False;TrustServerCertificate=True;
       - RedisSettings__Host=redis
       - RedisSettings__Port=6379
-      - RedisSettings__Password=
+      - RedisSettings__Password=passforredisdocker
       - RedisSettings__DefaultCacheMinutes=30
     depends_on:
       - redis
     networks:
       - app-network
 
+  # redis:
+  #   image: redis:7-alpine
+  #   ports:
+  #     - "6379:6379"
+  #   command: ["redis-server", "--requirepass", "passforredisdocker"]
+  #   volumes:
+  #     - redis-data:/data
+  #   networks:
+  #     - app-network
   redis:
-    image: redis:7-alpine
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis-data:/data
-    networks:
-      - app-network
+      image: redis:latest
+      container_name: architecture-showcase-api-redis-1
+      ports:
+        - "6379:6379"
+      command: ["redis-server", "--requirepass", "passforredisdocker"]
 
 networks:
   app-network:

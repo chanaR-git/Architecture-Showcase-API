@@ -44,26 +44,28 @@ builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSet
 builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("RedisSettings"));
 JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 RedisSettings? redisSettings = builder.Configuration.GetSection("RedisSettings").Get<RedisSettings>();
+// Register RedisSettings as singleton so it can be injected
+builder.Services.AddSingleton(redisSettings );
 
 if (jwtSettings is null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
 {
     throw new InvalidOperationException("Missing or invalid JwtSettings in configuration.");
 }
-
-// Register RedisSettings as singleton so it can be injected
-builder.Services.AddSingleton(redisSettings ?? new RedisSettings());
+if (redisSettings is null || string.IsNullOrWhiteSpace(redisSettings.Host))
+{
+    throw new InvalidOperationException("Missing or invalid RedisSettings in configuration.");
+}
 
 // Configure Redis
+// builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+//         ConnectionMultiplexer.Connect($"{redisSettings.Host}:{redisSettings.Port},password={redisSettings.Password},abortConnect=false"));
 builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 {
     var logger = sp.GetRequiredService<ILogger<Program>>();
     try
     {
         var config = ConfigurationOptions.Parse($"{redisSettings?.Host}:{redisSettings?.Port}");
-        if (!string.IsNullOrEmpty(redisSettings?.Password))
-        {
-            config.Password = redisSettings.Password;
-        }
+        config.Password = redisSettings.Password;
         config.AbortOnConnectFail = false; // Don't crash if Redis is down
         config.ConnectTimeout = 5000;
         config.SyncTimeout = 3000;
