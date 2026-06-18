@@ -30,6 +30,12 @@ namespace Chinese_sale_api.Services
 
         public async Task<T?> GetAsync<T>(string key) where T : class
         {
+            if (string.IsNullOrEmpty(key))
+            {
+                _logger.LogWarning("Cache key is null or empty");
+                return null;
+            }
+
             try
             {
                 var value = await _database.StringGetAsync(key);
