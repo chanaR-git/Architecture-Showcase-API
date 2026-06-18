@@ -45,7 +45,6 @@ builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("Redi
 JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 RedisSettings? redisSettings = builder.Configuration.GetSection("RedisSettings").Get<RedisSettings>();
 // Register RedisSettings as singleton so it can be injected
-builder.Services.AddSingleton(redisSettings );
 
 if (jwtSettings is null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
 {
@@ -56,6 +55,7 @@ if (redisSettings is null || string.IsNullOrWhiteSpace(redisSettings.Host))
     throw new InvalidOperationException("Missing or invalid RedisSettings in configuration.");
 }
 
+builder.Services.AddSingleton(redisSettings );
 // Configure Redis
 // builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
 //         ConnectionMultiplexer.Connect($"{redisSettings.Host}:{redisSettings.Port},password={redisSettings.Password},abortConnect=false"));
@@ -153,13 +153,14 @@ builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddSingleton<ITokenService,TokenService>();
+builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 builder.Services.AddScoped<ILotteryService, LotteryService>();
 builder.Services.AddScoped<IZIPService, ZIPService>();
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddHttpContextAccessor();
 
 builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+        options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
 
 
 var app = builder.Build();
