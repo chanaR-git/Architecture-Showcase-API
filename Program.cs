@@ -42,6 +42,24 @@ builder.Host.UseSerilog();
 // Add services to the container.
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("RedisSettings"));
+
+// Configure Rate Limiting
+var rateLimitConfig = new RateLimitConfig
+{
+    MaxRequests = builder.Configuration.GetValue<int>("RateLimit:MaxRequests", 100),
+    WindowSeconds = builder.Configuration.GetValue<int>("RateLimit:WindowSeconds", 60),
+    ExemptPaths = builder.Configuration.GetSection("RateLimit:ExemptPaths").Get<List<string>>() 
+        ?? new List<string>
+        {
+            "/health",
+            "/swagger",
+            "/swagger/",
+            "/api/auth/login",
+            "/api/auth/register"
+        }
+};
+builder.Services.AddSingleton(rateLimitConfig);
+
 JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
 RedisSettings? redisSettings = builder.Configuration.GetSection("RedisSettings").Get<RedisSettings>();
 // Register RedisSettings as singleton so it can be injected
@@ -166,6 +184,7 @@ builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RateLimitMiddleware>();
 app.UseMiddleware<RequestLog>();
 app.UseMiddleware<GiftAlreadyAsignedMiddleware>();
 app.UseCors("allowlocalhost");
