@@ -89,7 +89,7 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
         config.SyncTimeout = 3000;
 
         var connection = ConnectionMultiplexer.Connect(config);
-        logger.LogInformation("Connected to Redis at {Host}:{Port}", redisSettings?.Host, redisSettings?.Port);
+        logger.LogInformation("Connected to Redis at {Host}:{Port} (Password set: {HasPassword})", redisSettings?.Host, redisSettings?.Port, !string.IsNullOrEmpty(redisSettings?.Password));
         return connection;
     }
     catch (Exception ex)
@@ -177,8 +177,16 @@ builder.Services.AddScoped<IZIPService, ZIPService>();
 builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddHttpContextAccessor();
 
+var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(defaultConn, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(2), null);
+    }));
+
+var loggerForDb = builder.Logging;
+var tempLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Startup");
+tempLogger.LogInformation("Using database connection: {Conn}", defaultConn);
 
 
 var app = builder.Build();

@@ -37,5 +37,19 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     }
+  ,
+    "Local Debug (Redis)": {
+      "commandName": "Project",
+      "dotnetRunMessages": true,
+      "launchBrowser": true,
+      "launchUrl": "swagger",
+      "applicationUrl": "http://localhost:5000",
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development",
+        "RedisSettings__Host": "host.docker.internal",
+        "RedisSettings__Port": "6379",
+        "RedisSettings__Password": "passforredisdocker"
+      }
+    }
   }
 }

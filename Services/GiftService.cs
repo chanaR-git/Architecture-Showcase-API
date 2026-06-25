@@ -457,7 +457,7 @@ namespace Chinese_sale_api.Services
                 _logger.LogDebug("Invalidated all gifts cache");
 
                 // Invalidate paged cache (simplified - clears all paged caches)
-                // In production, you might want to use Redis SCAN to find matching keys
+                // In production, use Redis SCAN to find matching keys
                 await _cacheService.RemoveAsync($"{CACHE_KEY_GIFTS_PAGED}:*");
 
                 // If a specific gift was modified/deleted, invalidate its individual cache
