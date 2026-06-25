@@ -450,6 +450,7 @@ namespace Chinese_sale_api.Services
         /// </summary>
         private async Task InvalidateGiftCacheAsync(string? giftName = null)
         {
+            _logger.LogInformation("invalidating cache key");
             try
             {
                 // Always invalidate the all-gifts cache
