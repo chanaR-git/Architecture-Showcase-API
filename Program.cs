@@ -10,6 +10,7 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using projectApiAngular.Repositories;
 using Serilog;
+using StackExchange.Redis;
 using System.Text;
 
 
@@ -40,11 +41,65 @@ builder.Host.UseSerilog();
 
 // Add services to the container.
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
+builder.Services.Configure<RedisSettings>(builder.Configuration.GetSection("RedisSettings"));
+
+// Configure Rate Limiting
+var rateLimitConfig = new RateLimitConfig
+{
+    MaxRequests = builder.Configuration.GetValue<int>("RateLimit:MaxRequests", 100),
+    WindowSeconds = builder.Configuration.GetValue<int>("RateLimit:WindowSeconds", 60),
+    ExemptPaths = builder.Configuration.GetSection("RateLimit:ExemptPaths").Get<List<string>>() 
+        ?? new List<string>
+        {
+            "/health",
+            "/swagger",
+            "/swagger/",
+            "/api/auth/login",
+            "/api/auth/register"
+        }
+};
+builder.Services.AddSingleton(rateLimitConfig);
+
 JwtSettings? jwtSettings = builder.Configuration.GetSection("JwtSettings").Get<JwtSettings>();
+RedisSettings? redisSettings = builder.Configuration.GetSection("RedisSettings").Get<RedisSettings>();
+// Register RedisSettings as singleton so it can be injected
+
 if (jwtSettings is null || string.IsNullOrWhiteSpace(jwtSettings.SecretKey))
 {
     throw new InvalidOperationException("Missing or invalid JwtSettings in configuration.");
 }
+if (redisSettings is null || string.IsNullOrWhiteSpace(redisSettings.Host))
+{
+    throw new InvalidOperationException("Missing or invalid RedisSettings in configuration.");
+}
+
+builder.Services.AddSingleton(redisSettings );
+// Configure Redis
+// builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+//         ConnectionMultiplexer.Connect($"{redisSettings.Host}:{redisSettings.Port},password={redisSettings.Password},abortConnect=false"));
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var logger = sp.GetRequiredService<ILogger<Program>>();
+    try
+    {
+        var config = ConfigurationOptions.Parse($"{redisSettings?.Host}:{redisSettings?.Port}");
+        config.Password = redisSettings.Password;
+        config.AbortOnConnectFail = false; // Don't crash if Redis is down
+        config.ConnectTimeout = 5000;
+        config.SyncTimeout = 3000;
+
+        var connection = ConnectionMultiplexer.Connect(config);
+        logger.LogInformation("Connected to Redis at {Host}:{Port} (Password set: {HasPassword})", redisSettings?.Host, redisSettings?.Port, !string.IsNullOrEmpty(redisSettings?.Password));
+        return connection;
+    }
+    catch (Exception ex)
+    {
+        logger.LogWarning(ex, "Failed to connect to Redis. Caching will fall back to database.");
+        // Return a dummy connection that will fail gracefully
+        throw;
+    }
+});
+
 
 builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
@@ -117,17 +172,28 @@ builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddScoped<IBasketRepository, BasketRepository>();
 builder.Services.AddScoped<IBasketService, BasketService>();
 builder.Services.AddSingleton<ITokenService,TokenService>();
+builder.Services.AddSingleton<IKafkaProducerService, KafkaProducerService>();
 builder.Services.AddScoped<ILotteryService, LotteryService>();
 builder.Services.AddScoped<IZIPService, ZIPService>();
+builder.Services.AddScoped<IRedisCacheService, RedisCacheService>();
 builder.Services.AddHttpContextAccessor();
 
+var defaultConn = builder.Configuration.GetConnectionString("DefaultConnection");
 builder.Services.AddDbContext<ChineseSaleDbContext>(options =>
-        options.UseSqlServer(builder.Configuration.GetConnectionString("SeminaryConnection")));
+    options.UseSqlServer(defaultConn, sqlOptions =>
+    {
+        sqlOptions.EnableRetryOnFailure(5, TimeSpan.FromSeconds(2), null);
+    }));
+
+var loggerForDb = builder.Logging;
+var tempLogger = LoggerFactory.Create(b => b.AddConsole()).CreateLogger("Startup");
+tempLogger.LogInformation("Using database connection: {Conn}", defaultConn);
 
 
 var app = builder.Build();
 
 app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<RateLimitMiddleware>();
 app.UseMiddleware<RequestLog>();
 app.UseMiddleware<GiftAlreadyAsignedMiddleware>();
 app.UseCors("allowlocalhost");
@@ -154,6 +220,20 @@ app.UseStaticFiles(new StaticFileOptions
 });
 
 app.UseStaticFiles();
+
+app.UseExceptionHandler(exceptionHandlerApp =>
+{
+    exceptionHandlerApp.Run(async context =>
+    {
+        context.Response.StatusCode = Microsoft.AspNetCore.Http.StatusCodes.Status500InternalServerError;
+        context.Response.ContentType = "application/json";
+        var payload = System.Text.Json.JsonSerializer.Serialize(new { error = "An unexpected error occurred." });
+        await context.Response.WriteAsync(payload);
+    });
+});
+
+app.UseAuthentication();
+app.UseAuthorization();
 
 app.MapControllers();
 

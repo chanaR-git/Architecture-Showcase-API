@@ -17,15 +17,18 @@ namespace Chinese_sale_api.Services
         private readonly IGiftRepository _giftRepository;
         private readonly IUserRepository _userRepository;
         private readonly ILogger<LotteryService> _logger;
+        private readonly IKafkaProducerService _kafkaProducer;
+
         private const string ClassName = nameof(LotteryService);
         public static int CountLotteries { get; private set; } = 0;
 
-        public LotteryService(IPurchasesRepository purchasesRepository, IGiftRepository giftRepository, ILogger<LotteryService> logger, IUserRepository userRepository)
+        public LotteryService(IPurchasesRepository purchasesRepository, IGiftRepository giftRepository, ILogger<LotteryService> logger, IUserRepository userRepository, IKafkaProducerService kafkaProducer )
         {
             _purchasesRepository = purchasesRepository;
             _giftRepository = giftRepository;
             _logger = logger;
             _userRepository = userRepository;
+            _kafkaProducer = kafkaProducer;
         }
 
         public async Task<IEnumerable<ReadUserDto?>> RunLottery()
@@ -86,6 +89,29 @@ namespace Chinese_sale_api.Services
                 throw new InvalidOperationException("Error updating gift winner.");
 
             LoggingHelper.LogMethodSuccess(_logger, nameof(RunLottery), ClassName, new { WinnerName = winner.Name });
+
+            //===========================================Kafka Event Publishing===========================================
+            try
+            {
+                var lotteryEventPayload = new 
+                { 
+                    Event = "LotteryExecuted", 
+                    GiftName = gift.Name, 
+                    GiftId = gift.Id, 
+                    WinnerId = winner.Id, 
+                    WinnerName = winner.Name, 
+                    WinnerEmail = winner.Email, 
+                    ExecutedAt = DateTime.UtcNow 
+                }; 
+                string messageKey = gift.Id.ToString(); 
+                _logger.LogInformation("Publishing lottery event to Kafka for gift: {GiftName}", giftName); 
+                await _kafkaProducer.SendMessageAsync(messageKey, lotteryEventPayload); 
+            } 
+            catch (Exception ex) 
+            { 
+                _logger.LogError(ex, "Failed to send lottery event to Kafka for gift: {GiftName}", giftName); 
+            } 
+            
             return new ReadUserDto
             {
                 Id = winner.Id,
@@ -94,6 +120,7 @@ namespace Chinese_sale_api.Services
                 Phone = winner.Phone
             };
         }
+                    
 
         private async Task<int?> GetWinnerOfGift(string giftName)
         {
